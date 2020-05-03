@@ -1,0 +1,26 @@
+[package]
+name = "godwit"
+version = "0.1.0"
+authors = ["Utkarsh Bhardwaj (Passeriform) <bhardwajutkarsh.ub@gmail.com>"]
+readme = "README.md"
+exclude = [
+	"assets/*"
+]
+edition = "2018"
+
+[[bin]]
+name = "godwit"
+path = "src/main.rs"
+
+[dependencies]
+structopt = "0.3.9"
+structopt-derive = "0.4.2"
+dirs = "2.0.2"
+glob = "0.3.0"
+term_size = "0.3.1"
+serde = { version = "1.0.104", features = ["derive"] }
+serde_json = "1.0.48"
+log = "0.4.8"
+env_logger = "0.7.1"
+crossterm = "0.14.0"
+tui = { version = "0.8.0", default-features = false, features = ['crossterm'] }
