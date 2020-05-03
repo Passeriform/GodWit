@@ -1,0 +1,24 @@
+{
+    "default":{
+        "glyph":"@foo/bar"
+    },
+    "active":{
+        "glyph":"@foo/bar"
+    },
+    "states":[
+        {
+            "glyph":"@foo/bar",
+            "directory":"foo/bar",
+            "status":"local"
+        },
+        {
+            "glyph":"@foo/bar",
+            "directory":"foo/bar",
+            "status":"remote"
+        }
+    ],
+    "ignore":[
+        "/foo/bar",
+        "/foo/bar"
+    ]
+}

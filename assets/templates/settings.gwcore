@@ -1,0 +1,15 @@
+{
+  "working_dir": "/home/utkarsh/.godwit",
+  "states_dir": "/home/utkarsh/.godwit/states",
+  "headless": false,
+  "plugins": [
+    {
+      "name": "Sanity",
+      "exec": "yes"
+    },
+    {
+      "name": "Weaver",
+      "exec": "weaver -i"
+    },
+  ]
+}

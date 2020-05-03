@@ -1,0 +1,11 @@
+{
+    "working_dir":"/home/utkarsh/.godwit",
+    "states_dir":"/home/utkarsh/.godwit/states",
+    "headless":false,
+    "plugins": [
+        {
+            "name": "nightingale",
+            "exec": "dir"
+        }
+    ]
+}
