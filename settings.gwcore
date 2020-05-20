@@ -1,0 +1,12 @@
+{
+  "working_dir": null,
+  "states_dir": null,
+  "headless": true,
+  "switch_on_add": true,
+  "plugins": [
+    {
+      "name": "Sanity",
+      "exec": "yes"
+    }
+  ]
+}
