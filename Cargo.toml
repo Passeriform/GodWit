@@ -1,7 +1,7 @@
 [package]
 name = "godwit"
 description = "A project-state tracking suite."
-version = "1.0.0"
+version = "0.1.0"
 authors = ["Utkarsh Bhardwaj (Passeriform) <passeriform.ub@gmail.com>"]
 readme = "README.md"
 license = "MIT"
