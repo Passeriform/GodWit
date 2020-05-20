@@ -1,30 +1,59 @@
-/// I/O Handler Printer
-///
-/// Printer module for I/O Handler.
+use crate::errors::StateError;
+use crate::statehandler::State;
+use log::info;
+use prettytable::{cell, format, row, Table};
+use std::error::Error;
 
-/// Functions:
-///   print_state_graph -> Prints state-graph status in a stylized format.
+/// Print pretty state-graphs.
+pub fn print_state_graph(state_list: Vec<State>, verbose: bool) -> Result<(), Box<dyn Error>> {
+	if state_list.is_empty() {
+		info!("No projects added yet. Use the `add` operation.");
+		return Err(StateError::EmptyStateList.into());
+	}
 
-use crate::statehandler::StateGraph;
+	let mut table = Table::new();
 
-pub fn print_state_graph(state_list: StateGraph, verbose: Option<bool>) {
-    println!("\nProjects currently tracked under Godwit:");
-    match verbose {
-        Some(true) => {
-            println!("\n{:^20}|{:^20}|{:^20}", "Project", "Location", "Status");
-            println!("{:=^60}","");
+	let format = format::FormatBuilder::new()
+		.column_separator('│')
+		.borders('│')
+		.separator(
+			format::LinePosition::Top,
+			format::LineSeparator::new('─', '┬', '┌', '┐'),
+		)
+		.separator(
+			format::LinePosition::Intern,
+			format::LineSeparator::new('─', '┼', '├', '┤'),
+		)
+		.separator(
+			format::LinePosition::Bottom,
+			format::LineSeparator::new('─', '┴', '└', '┘'),
+		)
+		.padding(1, 1)
+		.build();
 
-            for state in state_list.states() {
-                println!("{:^20}|{:^20}|{:^20}", state.glyph, state.directory.unwrap().display(), state.status.unwrap());
-            }
-        },
-        Some(false) | None => {
-            println!("\n{:^20}|{:^20}", "Project", "Location");
-            println!("{:=^40}","");
+	table.set_format(format);
 
-            for state in state_list.states() {
-                println!("{:^20}|{:^20}", state.glyph, state.directory.unwrap().display());
-            }
-        }
-    }
+	if verbose {
+		table.set_titles(row![bic => "Project", "Location", "Status"]);
+
+		for state in state_list {
+			table.add_row(row![c =>
+				state.glyph,
+				format!("{}", state.directory.unwrap_or_default().display()),
+				format!("{:?}", state.status.unwrap_or_default()),
+			]);
+		}
+	} else {
+		table.set_titles(row![bic => "Project", "Location"]);
+
+		for state in state_list {
+			table.add_row(row![c =>
+				state.glyph,
+				format!("{}", state.directory.unwrap_or_default().display()),
+			]);
+		}
+	}
+
+	table.printstd();
+	Ok(())
 }

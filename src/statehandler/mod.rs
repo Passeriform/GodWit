@@ -1,131 +1,265 @@
-/// Godwit State Handler
-///
-/// A core state management utility for context switching and global singletons.
-///
-/// Structs/Enums:
-///    State -> Defines a singular project and its corresponding state.
-///    StateGraph -> Defines combination of multiple states and represents the snapshot of the application.
-///
-/// Implementation methods:
-///    new -> Returns new state-graph struct.
-///    active -> Sets the active state in a state-graph.
-///    fallback -> Sets the fallback state in a state-graph.
-///    states -> Returns a Vec<States> listing tracked states.
-///    append_state -> Appends a given state in the tracked states list.
-///    propagate -> Reflects the changes in a state-graph to the state-graph source file.
-///
-/// Functions:
-///    get_snapshot -> Returns a current state-graph from the state-graph source file.
-///    set_active -> Sets the active state in state-graph and propagates it.
-///    set_default -> Sets the default state in state-graph and propagates it.
-///    get_state_list -> Returns a Vec<States> listing tracked states.
-///    add_state -> Adds a new state to the state-graph and propagates it.
-
-use std::fs::File;
-use std::path::PathBuf;
-use serde::{Deserialize, Serialize};
-use crate::settings::fetch;
+use crate::errors::StateError;
 use crate::glyph::Glyph;
+use crate::settings;
+use getter_derive_rs::Getter;
+use serde::{Deserialize, Serialize};
+use std::{error::Error, fs::File, path::PathBuf};
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub struct StateGraph {
-    default: State,
-    active: State,
-    states: Vec<State>,
-    ignore: Vec<PathBuf>,
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+pub enum Status {
+	// TODO: Elaborate enums into impl
+	Active,
+	Remote,
+	Local,
+	Tracking,
+	Stale,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+/// Defines a singular project and its corresponding state.
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub struct State {
-    pub glyph: String,
-    pub directory: Option<PathBuf>,
-    pub status: Option<String>,
+	pub glyph: Glyph,
+	pub directory: Option<PathBuf>,
+	pub status: Option<Vec<Status>>,
 }
 
 impl Default for State {
-  fn default() -> Self {
-    State {
-        glyph: "@default/default".to_string(),
-        directory: None,
-        status: None,
-    }
-  }
+	fn default() -> Self {
+		State {
+			glyph: Default::default(),
+			directory: Default::default(),
+			status: Default::default(),
+		}
+	}
+}
+
+/// Defines combination of multiple states and represents the snapshot of the application.
+#[derive(Debug, Deserialize, Serialize, Getter)]
+#[serde(rename_all = "snake_case")]
+pub struct StateGraph {
+	default: Option<State>,
+	active: Option<State>,
+	states: Vec<State>,
+	ignore: Vec<PathBuf>,
 }
 
 impl StateGraph {
-    pub fn active(self, state: State) -> Self {
-        StateGraph {
-            active: state,
-            ..self
-        }
-    }
-    pub fn fallback(self, state: State) -> Self {
-        StateGraph {
-            default: state,
-            ..self
-        }
-    }
-    pub fn states(self) -> Vec<State> {
-        return self.states;
-    }
-    pub fn append_state(self, state: State) -> Self {
-        let mut state_list = self.states;
-        state_list.push(state);
+	/// Returns new state-graph.
+	pub fn init(
+		default: Option<State>,
+		active: Option<State>,
+		states: Option<Vec<State>>,
+		ignore: Option<Vec<PathBuf>>,
+	) -> Self {
+		StateGraph {
+			default: default,
+			active: active,
+			states: states.unwrap_or_default(), // TODO: Templates
+			ignore: ignore.unwrap_or_default(), // TODO: Templates
+		}
+	}
 
-        StateGraph {
-            states: state_list,
-            ..self
-        }
-    }
-    pub fn propagate(self) -> Result<(), &'static str> {
-        let json_file = File::create(fetch::get_settings()?.get_save_state()).expect("File wasn't found");
+	/// Sets the active state in a state-graph.
+	pub fn active(&mut self, state: &State) -> &mut Self {
+		self.active = Some(state.clone());
+		self
+	}
 
-        println!("{:?}", fetch::get_settings()?.get_save_state());
-        serde_json::to_writer_pretty(json_file, &self).expect("Writing file threw error");
-        Ok(())
-    }
+	/// Sets the fallback state in a state-graph.
+	pub fn fallback(&mut self, state: &State) -> &mut Self {
+		self.default = Some(state.clone());
+		self
+	}
+
+	/// Sets the working states in a state-graph.
+	pub fn states(&mut self, states: &Vec<State>) -> &mut Self {
+		self.states = states.to_vec();
+		self
+	}
+
+	/// Appends a state in the working states list.
+	pub fn append_state(&mut self, state: &State) -> &mut Self {
+		self.states.push(state.clone());
+		self
+	}
+
+	/// Drops state from the working states list.
+	pub fn drop_state(&mut self, state: &State) -> &mut Self {
+		self.states.retain(|p_state| p_state != state);
+		self
+	}
+	/// Searches state by glyph and directory
+	pub fn search_states(&self, q_term: String, fuzzy: bool) -> Option<State> {
+		for state in &self.states {
+			if fuzzy {
+				if state
+					.glyph
+					.to_string()
+					.to_lowercase()
+					.contains(&q_term.to_lowercase())
+					|| state
+						.directory
+						.clone()
+						.unwrap_or_default()
+						.to_string_lossy()
+						.to_lowercase()
+						.contains(&q_term.to_lowercase())
+				{
+					return Some(state.clone());
+				}
+			} else {
+				if state.glyph.to_string().to_lowercase() == q_term.to_lowercase() {
+					return Some(state.clone());
+				}
+			}
+		}
+		None
+	}
+
+	/// Commits changes to state-graph file.
+	pub fn propagate(&self) -> Result<(), Box<dyn Error>> {
+		File::open(settings::get_settings()?.get_save_state()?).and_then(|state_file| {
+			serde_json::to_writer_pretty(state_file, &self)?;
+			Ok(())
+		})?;
+		Ok(())
+	}
 }
 
 impl Default for StateGraph {
-  fn default() -> Self {
-    StateGraph {
-        default: State::default(),
-        active: State::default(),
-        states: vec![State::default()],
-        ignore: vec![PathBuf::default()]
-    }
-  }
+	fn default() -> Self {
+		StateGraph {
+			default: Default::default(),
+			active: Default::default(),
+			states: Default::default(),
+			ignore: Default::default(),
+		}
+	}
 }
 
-pub fn get_snapshot() -> Result<StateGraph, &'static str> {
-    let json_file = File::open(fetch::get_settings()?.get_save_state()).expect("File wasn't found");
-    let state_graph: StateGraph = serde_json::from_reader(json_file).expect("State JSON is invalid");  //Solution is a bit fucky
-    return Ok(state_graph);
+/// Returns a state-graph instance from the state-graph file.
+pub fn load_stategraph() -> Result<StateGraph, Box<dyn Error>> {
+	let state_graph =
+		File::open(settings::get_settings()?.get_save_state()?).and_then(|state_file| {
+			let state_graph: StateGraph = serde_json::from_reader(state_file)?;
+			Ok(state_graph)
+		})?;
+	Ok(state_graph)
 }
 
-pub fn set_active(state_item: State) {
-    let sg_snapshot: StateGraph = get_snapshot().unwrap_or(StateGraph::default());
+/// Sets the active state in state-graph and propagates it.
+pub fn set_active(q_glyph: &Glyph) -> Result<(), Box<dyn Error>> {
+	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
-    sg_snapshot.active(state_item).propagate().expect("Error occured in state propagation.");
+	sg_snapshot
+		.search_states(q_glyph.to_string(), true)
+		.map_or_else(
+			|| {
+				Err(StateError::StateNotFound {
+					state: q_glyph.clone().into(),
+				}
+				.into())
+			},
+			|q_state| {
+				sg_snapshot.active(&q_state).propagate()?;
+				Ok(())
+			},
+		)
 }
 
-pub fn set_default(state_item: State) {
-    let sg_snapshot: StateGraph = get_snapshot().unwrap_or(StateGraph::default());
+/// Sets the default state in state-graph and propagates it.
+pub fn set_default(q_glyph: &Glyph) -> Result<(), Box<dyn Error>> {
+	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
-    sg_snapshot.fallback(state_item).propagate().expect("Error occured in state propagation.");
+	sg_snapshot
+		.search_states(q_glyph.to_string(), true)
+		.map_or_else(
+			|| {
+				Err(StateError::StateNotFound {
+					state: q_glyph.clone().into(),
+				}
+				.into())
+			},
+			|q_state| {
+				sg_snapshot.fallback(&q_state).propagate()?;
+				Ok(())
+			},
+		)
 }
 
-pub fn get_state_list(snapshot: StateGraph) -> Vec<State> {
-    return snapshot.states;
+/// Adds a new state in state-graph.
+pub fn add_state(
+	glyph: Glyph,
+	location: PathBuf,
+	status: Option<Vec<Status>>,
+	as_active: bool,
+	as_default: bool,
+) -> Result<(), Box<dyn Error>> {
+	let mut sg_snapshot = load_stategraph().unwrap_or_default();
+
+	if sg_snapshot
+		.search_states(glyph.to_string(), false)
+		.is_none()
+		&& sg_snapshot
+			.search_states(location.to_string_lossy().to_string(), false)
+			.is_none()
+	{
+		let new_state = State {
+			glyph: glyph,
+			directory: Some(location),
+			status: status,
+		};
+
+		let mut sg_snapshot = sg_snapshot.append_state(&new_state);
+
+		if sg_snapshot.get_default().is_none() || as_default {
+			sg_snapshot = sg_snapshot.fallback(&new_state);
+		}
+
+		if settings::get_settings()?.get_switch_on_add() || as_active {
+			sg_snapshot = sg_snapshot.active(&new_state);
+		}
+
+		sg_snapshot.propagate()?;
+
+		Ok(())
+	} else {
+		Err(StateError::StateAlreadyExists {
+			state: glyph.into(),
+		}
+		.into())
+	}
 }
 
-pub fn add_state(glyph: Glyph, location: PathBuf) -> Result<(), &'static str> {
-    let sg_snapshot = get_snapshot().unwrap_or(StateGraph::default());
+/// Removes the state from state-graph
+pub fn purge_state(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
+	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
-    let new_state = State {glyph: glyph.to_str(), directory: Some(location), ..Default::default()};
+	sg_snapshot
+		.search_states(q_glyph.to_string(), true)
+		.map_or_else(
+			|| {
+				Err(StateError::StateNotFound {
+					state: q_glyph.into(),
+				}
+				.into())
+			},
+			|q_state| {
+				let mut sg_snapshot = sg_snapshot.drop_state(&q_state);
 
-    sg_snapshot.append_state(new_state).propagate().expect("Error occured in appending states.");
-    Ok(())
+				if q_state == sg_snapshot.get_default().unwrap_or_default() {
+					sg_snapshot = sg_snapshot.fallback(&sg_snapshot.get_states()[0]);
+				}
+
+				if q_state == sg_snapshot.get_active().unwrap_or_default() {
+					sg_snapshot =
+						sg_snapshot.active(&sg_snapshot.get_default().unwrap_or_default());
+				}
+
+				sg_snapshot.propagate()?;
+
+				Ok(())
+			},
+		)
 }

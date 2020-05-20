@@ -1,10 +1,8 @@
-/// I/O Handler
+/// Printer
 ///
-/// Custom wrapper handler over generic printer and scanner for terminal and HID interfaces.
-///
-/// Modules:
-///    scanner -> Controls input and read operations.
-///    printer -> Controls output and write operations.
-
-pub mod scanner;
+/// Controls input and read operations. Utility abstraction over general stdio input/read operations.
 pub mod printer;
+/// Scanner
+///
+/// Controls output and write operations. Utility abstraction over general stdio output/write operations.
+pub mod scanner;

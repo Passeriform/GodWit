@@ -1,87 +1,86 @@
-/// Plugin Interface
-///
-/// Will be used as a unified processor for all godwit-compatible plugins.
-/// Must follow a unified standard to keep minimal branching.
-///
-/// Functions:
-///    invoke -> One time godwit working setup call with settings return
-///    pipe -> add project to godwit tracker
-///    query -> list tracked projects
-
-use std::{
-    process::{
-        Output,
-        Command,
-        Stdio
-    }
-};
+use crate::errors::{IOError, PluginError};
+use crate::settings;
+use getter_derive_rs::Getter;
 use serde::{Deserialize, Serialize};
-use crate::settings::fetch;
+use std::{
+	error::Error,
+	process::{Command, Output, Stdio},
+};
 
-#[derive(Debug, Deserialize, Serialize)]
+/// Plugin structure
+#[derive(Debug, Deserialize, Serialize, Getter, Clone)]
 #[serde(rename_all = "snake_case")]
 pub struct Plugin {
-    name: String,
-    exec: String,
+	name: String,
+	exec: String,
 }
 
 impl Default for Plugin {
-  fn default() -> Self {
-    Plugin {
-        name: "Sanity".to_string(),
-        exec: "yes".to_string(),
-    }
-  }
+	fn default() -> Self {
+		Plugin {
+			name: Default::default(),
+			exec: Default::default(),
+		}
+	}
 }
 
-impl Plugin {
-    pub fn get_exec(self) -> String {
-        return self.exec;
-    }
+/// Call a detached external process for a plugin.
+pub fn invoke(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Output, Box<dyn Error>> {
+	let command_str = get_plugin(plugin_str)?.get_exec();
+	let mut args = args_options.unwrap_or_default();
+
+	let command = str_to_command!(command_str, &mut args);
+
+	let output = Command::new(command).args(args).output()?;
+
+	Ok(output)
 }
 
-pub fn invoke(plugin_str: &str, args: Option<Vec<&str>>) -> Result<Output, &'static str> {
-    let output = Command::new(get_plugin(plugin_str.to_string())?.get_exec())
-    .args(args.unwrap_or(Vec::new()))
-    .output()
-    .expect("Process failed to return.");
+/// Bind stdio to spawned child process and pipe io to it.
+pub fn bind(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Vec<u8>, Box<dyn Error>> {
+	let command_str = get_plugin(plugin_str)?.get_exec();
+	let mut args = args_options.unwrap_or_default();
 
-    Ok(output)
+	let command = str_to_command!(command_str, &mut args);
+
+	let child = Command::new(command)
+		.args(args)
+		.stdin(Stdio::piped())
+		.stderr(Stdio::piped())
+		.stdout(Stdio::piped())
+		.spawn()?;
+
+	let output = child.wait_with_output()?;
+
+	if output.status.success() {
+		Ok(output.stdout)
+	} else {
+		Err(IOError::StdErr {
+			err: String::from_utf8(output.stderr)?,
+		}
+		.into())
+	}
 }
 
-pub fn pipe(plugin_str: &str, args: Option<Vec<&str>>) -> Result<Vec<u8>, Vec<u8>> {
-    let child = Command::new(get_plugin(plugin_str.to_string())?.get_exec())
-        .args(args.unwrap_or(Vec::new()))
-        .stdin(Stdio::piped())
-        .stderr(Stdio::piped())
-        .stdout(Stdio::piped())
-        .spawn()
-        .expect("Process failed to return.");
-
-    let output = child
-        .wait_with_output()
-        .expect("Process failed on wait");
-
-    if output.status.success() {
-        Ok(output.stdout)
-    } else {
-        Err(output.stderr)
-    }
+/// Retrieve plugin from queried name.
+pub fn get_plugin(q_plugin: &str) -> Result<Plugin, Box<dyn Error>> {
+	let plugins = settings::get_settings()?.get_plugins();
+	plugins
+		.into_iter()
+		.find(|plugin| plugin.name == q_plugin)
+		.map_or(
+			Err(PluginError::PluginNotFound {
+				plugin: q_plugin.into(),
+			}
+			.into()),
+			|plugin| Ok(plugin),
+		)
 }
 
-pub fn query() -> Result<(), &'static str> {
-
-    Ok(())
-}
-
-pub fn get_plugin(name: String) -> Result<Plugin, &'static str> {
-    let plugins = fetch::get_settings()?.get_plugins();
-    Ok(plugins.into_iter().find(|plugin| plugin.name == name).unwrap_or(Plugin::default()))
-}
-
-pub fn new(name: Option<&str>, exec: Option<&str>) -> Plugin {
-    return Plugin {
-        name: String::from(name.unwrap_or_default()),
-        exec: String::from(exec.unwrap_or_default())
-    }
+/// Create new plugin.
+pub fn new(name: &str, exec: &str) -> Plugin {
+	Plugin {
+		name: name.to_string(),
+		exec: exec.to_string(),
+	}
 }

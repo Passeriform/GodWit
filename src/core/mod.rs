@@ -1,89 +1,70 @@
-/// Godwit Core
+/// Templated Setup Core
 ///
-/// Will be used as an API and general low level abstraction. Mostly with call forward wrappers.
-/// It contains full API definitions and endpoints to integrate Godwit core.
-///
-/// Functions:
-///    init -> One time godwit working setup call with settings return
-///    add -> add project to godwit tracker
-///    list -> list tracked projects
-///    killsave -> remove previous active saved state-graph
-///    switch -> switch the active project
-///    runsplash -> trigger/forward the splash tui
-
+/// Separated setup core chunk for ease of abstraction. Must be percieved as one
+/// unit with the core. It contains additional API calls for templated
+/// setups.
 mod setup;
+/// TUI Splash Core
+///
+/// TUI splash procedure core. Dictates the TUI windows and operations.
 pub mod splash;
 
-use std::{
-    io,
-    path::PathBuf,
+use crate::{
+	core::setup::{setup_gw_dir, setup_init_state},
+	glyph::Glyph,
+	plugins,
+	statehandler::{self, State},
 };
-use crate::glyph::Glyph;
-use crate::statehandler::{
-    self,
-    State,
-    StateGraph
-};
-use crate::plugins;
-use self::setup::{setup_gw_dir, setup_init_state};
+use std::{error::Error, io, path::PathBuf};
 
-pub fn init(path: Option<PathBuf>, headless: Option<bool>) -> Result<(), &'static str> {
-    match setup_gw_dir(path, headless) {
-        Ok(_) => (),
-        Err(e) => return Err(e),
-    };
-
-    match setup_init_state() {
-        Ok(_) => (),
-        Err(e) => return Err(e),
-    };
-
-    return Ok(());
+/// One-time Godwit setup call.
+pub fn init(path: Option<PathBuf>, headless: bool, refresh: bool) -> Result<(), Box<dyn Error>> {
+	setup_gw_dir(path, headless, refresh)?;
+	setup_init_state()?;
+	Ok(())
 }
 
-pub fn add(glyph: Glyph, location: PathBuf, existing: Option<bool>) -> Result<(), &'static str> {
-    match existing {
-        Some(false) => {
-            match plugins::invoke("Weaver", None) {
-                Ok(_) => (),
-                Err(e) => return Err(e)
-            };
-        }
-        Some(true) | None => ()
-    }
+/// Add project to Godwit.
+pub fn add(
+	glyph: Glyph,
+	location: PathBuf,
+	existing: bool,
+	active: bool,
+	default: bool,
+) -> Result<(), Box<dyn Error>> {
+	if !existing {
+		plugins::invoke("Weaver", None)?;
+	}
 
-    match statehandler::add_state(glyph, location) {
-        Ok(_) => println!("State added"),
-        Err(e) => return Err(e)
-    };
-
-    Ok(())
+	statehandler::add_state(glyph, location, None, active, default)?;
+	Ok(())
 }
 
-pub fn list() -> Result<StateGraph, &'static str> {
-    return match statehandler::get_snapshot() {
-        Ok(current_state) => Ok(current_state),
-        Err(e) => Err(e)
-    };
+/// Remove project from Godwit
+pub fn remove(glyph: Glyph) -> Result<(), Box<dyn Error>> {
+	statehandler::purge_state(glyph)?;
+	Ok(())
 }
 
-pub fn switch(glyph: Glyph) -> Result<(), &'static str> {
-    let new_state: State = State {  // unimplemented!
-        glyph: glyph.to_str(),
-        ..Default::default()
-    };
-
-    statehandler::set_active(new_state);
-    Ok(())
+/// List projects under Godwit.
+pub fn list() -> Result<Vec<State>, Box<dyn Error>> {
+	let states = statehandler::load_stategraph()?.get_states().to_vec();
+	Ok(states)
 }
 
-pub fn killsave() { // unimplemented!
+/// Switch to another project under Godwit.
+pub fn switch(glyph: Glyph, default: bool) -> Result<(), Box<dyn Error>> {
+	statehandler::set_active(&glyph)?;
 
+	if default {
+		statehandler::set_default(&glyph)?;
+	}
+
+	Ok(())
 }
 
+/// Forward to splash TUI.
 pub fn runsplash() -> Result<(), io::Error> {
-    return match splash::run() {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e)
-    };
+	splash::run()?;
+	Ok(())
 }

@@ -1,35 +1,37 @@
-/// I/O Handler Scanner
-///
-/// Scanner module for I/O Handler.
-///
-/// Functions:
-///    read_lines -> Collect bytes from ANSI document and return std::io::Lines.
-///    get_art_para -> Collect std::io::Lines into Vec<String>.
-
 use std::{
-    fs::File,
-    io::{Result, Lines, BufRead, BufReader},
-    path::Path,
+	fs::File,
+	io::{BufRead, BufReader, Lines, Result},
+	path::Path,
 };
 
-pub fn read_lines<P>(filename: P) -> Result<Lines<BufReader<File>>> where P: AsRef<Path>, {
-    let file = File::open(filename)?;
-    Ok(BufReader::new(file).lines())
+/// Collect bytes from ANSI document and return io::Lines.
+pub fn read_ansi<P>(filename: P) -> Result<Lines<BufReader<File>>>
+where
+	P: AsRef<Path>,
+{
+	let file = File::open(filename)?;
+	Ok(BufReader::new(file).lines())
 }
 
-pub fn get_art_para(filename: &str, width: usize) -> Result<Vec<String>> {
-    let mut linevec = Vec::new();
+/// Collect io::Lines into list of strings.
+pub fn parse_art(filename: &str, width: usize) -> Result<Vec<String>> {
+	let mut linevec = Vec::new();
 
-    if let Ok(lines) = read_lines(filename) {
-        for line in lines {
-            if let Ok(artline) = line {
-                if !artline.starts_with("?>=") {
-                    let snipline: String = String::from(&artline).chars().into_iter().take(width).collect();
+	read_ansi(filename).and_then(|lines| {
+		for line in lines {
+			let line = line?;
+			if !line.starts_with("?>=") {
+				linevec.push(
+					String::from(line)
+						.chars()
+						.into_iter()
+						.take(width)
+						.collect::<String>() + "\n",
+				);
+			}
+		}
+		Ok(())
+	})?;
 
-                    linevec.push(snipline+"\n");
-                }
-            }
-        }
-    }
-    Ok(linevec)
+	Ok(linevec)
 }

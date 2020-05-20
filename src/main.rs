@@ -1,209 +1,300 @@
-/// Main Handler
+// TODO: Documentation
+// TODO: Pattern matching for errors in this file
+/// Utility functions and macros
+pub mod _utils; // TODO: Ugly naming fix for fmt
+/// Godwit Core
 ///
-/// Godwit core wrapper for utility exposure. Used as an example of godwit API and abstraction usage.
-///
-/// Structs/Enums:
-///    CliArgs -> Defines CLI syntaxes using StructOpt.
-///    OpsEnum -> CLI call enum for Godwit core operations.
-
-/// Implementations:
-///    None
-
-/// Functions:
-///    main -> Entry point/cli parser
-
-use structopt::StructOpt;
-use std::path::PathBuf;
-use env_logger;
-use log::{
-    info,
-    error,
-    debug
-};
-
+/// General abstraction over the operations used as an API with call
+/// forward wrappers. It contains full API definitions and endpoints to
+/// integrate Godwit core.
 pub mod core;
+/// Errors
+///
+/// Errors for Godwit suite and services.
+pub mod errors;
+/// Glyphs Implementation
+///
+/// Defines glyph as core of Godwit's datatype of choice. Implementations
+/// support borrow lifecyle and can be serialized.
 pub mod glyph;
+/// I/O Handler
+///
+/// Custom wrapper handler over generic printer and scanner for terminal and HID
+/// interfaces.
 pub mod iohandler;
-pub mod statehandler;
+/// Plugin Interface
+///
+/// A composite processor for all godwit-compatible plugins.
+/// Must follow a unified standard to keep minimal deviation.
 pub mod plugins;
+/// Godwit Settings Management
+///
+/// A utility abstraction over persistent settings and access methods.
 pub mod settings;
+/// Godwit State Handler
+///
+/// A core state management utility for context switching and global singletons.
+pub mod statehandler;
 
+use crate::glyph::Glyph;
+use log::{debug, error, info};
+use simplelog::*;
+use std::path::PathBuf;
+use structopt::{clap::Shell, StructOpt};
+
+// Define CLI syntaxes.
 #[derive(Debug, StructOpt)]
-#[structopt(name = "Godwit", about = "An all-in-one organizational project management utility.")]
+#[structopt(
+	name = "Godwit",
+	about = "An all-in-one organizational project management utility."
+)]
 struct CliArgs {
-    /// Activate debug mode
-    #[structopt(short, long)]
-    debug:              bool,
+	/// Silence all output
+	#[structopt(short, long, global = true, conflicts_with = "verbose")]
+	quiet: bool,
 
-    /// Select organization name (optional)
-    #[structopt(short, long = "org")]
-    organization:   Option<String>,
+	/// Debug mode
+	#[structopt(
+		short,
+		long,
+		global = true,
+		conflicts_with = "quiet",
+		parse(from_occurrences)
+	)]
+	verbose: u64,
 
-    /// Select project name (optional)
-    #[structopt(short, long)]
-    project:        Option<String>,
+	/// Organization (for all operations) (Overrides glyph)
+	#[structopt(
+		short,
+		long = "org",
+		global = true,
+		// required_unless = "glyph",
+		// conflicts_with = "glyph"
+	)]
+	organization: Option<String>,
 
-    /// Select an operation
-    #[structopt(subcommand)]
-    operation:      Option<OpsEnum>,
+	/// Project in organization (for all operations) (Overrides glyph)
+	#[structopt(
+		short,
+		long,
+		global = true,
+		// required_unless = "glyph",
+		// conflicts_with = "glyph"
+	)]
+	project: Option<String>,
+
+	/// Operation selection
+	#[structopt(subcommand)]
+	operation: Option<OpsEnum>,
 }
 
-
+/// CLI call enum for Godwit core operations.
 #[derive(Debug, StructOpt)]
 #[structopt(about = "Operation selection")]
 enum OpsEnum {
-    /// Setup Godwit for the first time
-    Init {
-        /// Give a target path to setup
-        target:         Option<PathBuf>,
+	/// Setup Godwit working directory
+	Init {
+		/// Target path to godwit directory (Will bind a symlink)
+		target: Option<PathBuf>,
 
-        /// Configure a headless setup
-        #[structopt(long)]
-        headless:       Option<bool>,
-    },
-    /// Switch to target glyph, organization or project
-    Switch {
-        /// Select oranization
-        #[structopt(short, long = "org", requires = "project", required_unless = "glyph", conflicts_with = "glyph")]
-        organization:   Option<String>,
+		/// Headless setup
+		#[structopt(long)]
+		headless: bool,
 
-        /// Select project in current organization
-        #[structopt(short, long, required_unless = "glyph", conflicts_with = "glyph")]
-        project:        Option<String>,
+		/// Purge existing settings before setup
+		#[structopt(long)]
+		refresh: bool,
+	},
+	/// Switch to target glyph, organization or project
+	Switch {
+		/// Glyph (@organization/project)
+		#[structopt(required_unless_all = &["project", "organization"], conflicts_with_all = &["project", "organization"])]
+		glyph: Option<Glyph>,
 
-        /// Select glyph (@organization/project)
-        #[structopt(required_unless_all = &["project", "organization"], conflicts_with_all = &["project", "organization"])]
-        glyph:          Option<String>,
-    },
-    /// Add projects under Godwit
-    Add {
-        /// Choose if project is pre-existing
-        #[structopt(short, long)]
-        existing:        Option<bool>,
+		/// Use as default project
+		#[structopt(long)]
+		default: bool,
+	},
+	/// Add projects under Godwit
+	Add {
+		/// Glyph (@organization/project)
+		#[structopt(required_unless_all = &["project", "organization"], conflicts_with_all = &["project", "organization"])]
+		glyph: Option<Glyph>,
 
-        /// Select glyph (@organization/project)
-        #[structopt(required_unless_all = &["project", "organization"], conflicts_with_all = &["project", "organization"])]
-        glyph:          Option<String>,
+		/// Working path for project
+		location: PathBuf,
 
-        /// Select oranization
-        #[structopt(short, long = "org", requires = "project", required_unless = "glyph", conflicts_with = "glyph")]
-        organization:   Option<String>,
+		/// Add existing project (Doesn't trigger weaver)
+		#[structopt(short, long)]
+		existing: bool,
 
-        /// Select project in current organization
-        #[structopt(short, long, required_unless = "glyph", conflicts_with = "glyph")]
-        project:        Option<String>,
+		/// Add as active project
+		#[structopt(long)]
+		active: bool,
 
-        /// Select working location for project
-        location:       PathBuf,
-    },
-    /// List all added projects
-    Status {
-        /// Choose if project is pre-existing
-        #[structopt(short, long="verbose")]
-        verbose:        bool,
-    },
-    /// Kill the current save state
-    KillSave,
+		/// Add as default project
+		#[structopt(long)]
+		default: bool,
+	},
+	/// Remove projects under Godwit
+	Remove {
+		/// Select glyph (@organization/project)
+		#[structopt(required_unless_all = &["project", "organization"], conflicts_with_all = &["project", "organization"])]
+		glyph: Option<Glyph>,
+	},
+	/// Display Godwit's status
+	Status,
 }
 
+fn get_log_level(quiet: bool, verbosity: u64) -> LevelFilter {
+	if quiet {
+		return LevelFilter::Off;
+	} else if verbosity == 0 || verbosity == 1 {
+		return LevelFilter::Warn;
+	} else if verbosity == 2 {
+		return LevelFilter::Info;
+	} else if verbosity == 3 {
+		return LevelFilter::Debug;
+	} else {
+		return LevelFilter::Trace;
+	}
+}
+
+/// Main entry point
 fn main() {
-    env_logger::init();
-    let _args = CliArgs::from_args();
+	CliArgs::clap().gen_completions(env!("CARGO_PKG_NAME"), Shell::Bash, "target");
 
-    match _args.operation {
-        Some(OpsEnum::Init { target, headless }) => {
-            debug!("[core] Entered init operation.");
-            match core::init(target, headless) {
-                Ok(_) => {
-                    debug!("[init] Init operation passed.");
-                    info!("Looks like we're good to go!");
-                }
-                Err(e) => {
-                    debug!("[init] Init operation failed.\n{}", e);
-                    error!("Error occured while completing setup for Godwit directories.\n{}", e);
-                }
-            }
-        }
-        Some(OpsEnum::Add { existing, glyph, organization, project, location }) => {
-            debug!("[core] Entered add operation.");
+	let args = CliArgs::from_args();
 
-            let glyph_str: String = glyph.unwrap_or_else(||
-                glyph::new(
-                    organization.unwrap().as_str(),
-                    project.unwrap().as_str()
-                ).to_str()
-            );
+	// Application globals
+	let (organization, project) = (args.organization, args.project);
+	// Logging globals
+	let (verbose, verbosity, quiet) = (args.verbose > 0, args.verbose, args.quiet);
 
-            debug!("[add] Adding {}", glyph_str);
+	// Logger setup
+	CombinedLogger::init(vec![TermLogger::new(
+		get_log_level(quiet, verbosity),
+		Config::default(),
+		TerminalMode::Mixed,
+	)
+	.unwrap()])
+	.unwrap();
 
-            match core::add(
-                glyph::from(glyph_str)
-                .unwrap_or(glyph::Glyph {..Default::default()}),
-                location,
-                existing
-            ) {
-                Ok(glyph) => {
-                    debug!("[add] Add operation passed.");
-                    info!("Added to project:\n{:#?}", glyph);
-                },
-                Err(e) => {
-                    debug!("[add] Add operation failed.\n{}", e);
-                    error!("Error occured while adding new state.\n{}", e);
-                }
-            }
-        }
-        Some(OpsEnum::Switch { glyph, organization, project }) => {
-            debug!("[core] Entered switch operation.");
+	match args.operation {
+		Some(OpsEnum::Init {
+			target,
+			headless,
+			refresh,
+		}) => {
+			debug!("Entered init operation.");
+			match core::init(target, headless, refresh) {
+				Ok(_) => {
+					debug!("Init operation passed.");
+					info!("Looks like we're good to go!");
+				}
+				Err(e) => {
+					debug!("Init operation failed.\n{}", e);
+					error!(
+						"Error occured while completing setup for Godwit directories.\n{}",
+						e
+					);
+				}
+			}
+		}
+		Some(OpsEnum::Add {
+			existing,
+			glyph,
+			location,
+			active,
+			default,
+		}) => {
+			debug!("Entered add operation.");
 
-            let glyph_str: String = glyph.unwrap_or(
-                glyph::new(
-                    organization.unwrap().as_str(),
-                    project.unwrap().as_str()
-                ).to_str()
-            );
+			let glyph = glyph.unwrap_or_else(|| glyph::Glyph {
+				tag: organization.unwrap_or_default(),
+				id: project.unwrap_or_default(),
+			});
 
-            debug!("[switch] Switching to {}", glyph_str);
+			debug!("Adding {}", &glyph);
 
-            match core::switch(
-                glyph::from(glyph_str)
-                .unwrap_or(glyph::Glyph {..Default::default()})
-            ) {
-                Ok(glyph) => {
-                    debug!("[switch] Switch operation passed.");
-                    info!("Switched to project:\n{:#?}", glyph);
-                },
-                Err(e) => {
-                    debug!("[switch] Switch operation failed.\n{}", e);
-                    error!("Error occured while switching projects.\n{}", e);
-                }
-            }
-        }
-        Some(OpsEnum::Status { verbose }) => {
-            match core::list() {
-                Ok(project_list) => {
-                    debug!("[status] List operation passed.");
-                    iohandler::printer::print_state_graph(project_list, Some(verbose));
-                },
-                Err(e) => {
-                    debug!("[status] Switch operation failed.\n{}", e);
-                    error!("Error occured while listing projects.\n{}", e);
-                }
-            };
-        }
-        Some(OpsEnum::KillSave) => {
-            core::killsave();
-        }
-        None => {
-            match core::runsplash() {
-                Ok(_) => {
-                    debug!("[tui] Returned successfully.");
-                    info!("Godwit exited with success");
-                },
-                Err(e) => {
-                    debug!("[tui] An exception was thrown.\n{}", e);
-                    error!("Godwit threw an exception.\n{}", e);
-                }
-            };
-        }
-    }
+			match core::add(glyph, location, existing, active, default) {
+				Ok(_) => {
+					debug!("Add operation passed.");
+					// info!("Added project {}", glyph);
+				}
+				Err(e) => {
+					debug!("Add operation failed.\n{}", e);
+					error!("Error occured while adding new state.\n{}", e);
+				}
+			}
+		}
+		Some(OpsEnum::Remove { glyph }) => {
+			debug!("Entered remove operation.");
+
+			let glyph = glyph.unwrap_or_else(|| glyph::Glyph {
+				tag: organization.unwrap_or_default(),
+				id: project.unwrap_or_default(),
+			});
+
+			debug!("Removing {}", glyph);
+
+			match core::remove(glyph) {
+				Ok(_) => {
+					debug!("Remove operation passed.");
+					// info!("Removed project {}", glyph);
+				}
+				Err(e) => {
+					debug!("Remove operation failed.\n{}", e);
+					error!("Error occured while removing state.\n{}", e);
+				}
+			}
+		}
+		Some(OpsEnum::Switch { glyph, default }) => {
+			debug!("Entered switch operation.");
+
+			let glyph = glyph.unwrap_or_else(|| glyph::Glyph {
+				tag: organization.unwrap_or_default(),
+				id: project.unwrap_or_default(),
+			});
+
+			debug!("Switching to {}", glyph);
+
+			match core::switch(glyph, default) {
+				Ok(_) => {
+					debug!("Switch operation passed.");
+					// info!("Switched to project:\n{}", glyph);
+				}
+				Err(e) => {
+					debug!("Switch operation failed.\n{}", e);
+					error!("Error occured while switching projects.\n{}", e);
+				}
+			}
+		}
+		Some(OpsEnum::Status) => {
+			match core::list() {
+				Ok(state_list) => {
+					debug!("Status operation passed.");
+					iohandler::printer::print_state_graph(state_list, verbose)
+						.map_err(|e| error!("{:?}", e))
+						.ok();
+				}
+				Err(e) => {
+					debug!("Status operation failed.\n{}", e);
+					error!("Error occured while listing projects.\n{}", e);
+				}
+			};
+		}
+		None => {
+			match core::runsplash() {
+				Ok(_) => {
+					debug!("Returned successfully.");
+					info!("Godwit exited with success");
+				}
+				Err(e) => {
+					debug!("An exception was thrown.\n{}", e);
+					error!("Godwit threw an exception.\n{}", e);
+				}
+			};
+		}
+	}
 }
