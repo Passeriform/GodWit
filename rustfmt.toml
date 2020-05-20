@@ -1,0 +1,4 @@
+edition = "2018"
+hard_tabs = true
+reorder_imports = true
+use_try_shorthand = true
