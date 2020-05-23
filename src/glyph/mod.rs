@@ -1,3 +1,7 @@
+//! Glyphs Implementation
+//!
+//! Defines glyph as core of Godwit's datatype of choice. Implementations
+//! support borrow lifecyle and can be serialized.
 use crate::errors::GlyphError;
 use log::debug;
 use serde::{Deserialize, Serialize};

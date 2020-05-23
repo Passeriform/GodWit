@@ -1,8 +1,6 @@
-/// Printer
-///
-/// Controls input and read operations. Utility abstraction over general stdio input/read operations.
+//! I/O Handler
+//!
+//! Custom wrapper handler over generic printer and scanner for terminal and HID
+//! interfaces.
 pub mod printer;
-/// Scanner
-///
-/// Controls output and write operations. Utility abstraction over general stdio output/write operations.
 pub mod scanner;

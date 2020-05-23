@@ -1,3 +1,7 @@
+//! Plugin Interface
+//!
+//! A composite processor for all godwit-compatible plugins.
+//! Must follow a unified standard to keep minimal deviation.
 use crate::errors::{IOError, PluginError};
 use crate::settings;
 use getter_derive_rs::Getter;

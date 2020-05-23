@@ -1,3 +1,6 @@
+//! Godwit Settings Management
+//!
+//! A utility abstraction over persistent settings and access methods.
 use crate::errors::SettingsError;
 use crate::plugins::Plugin;
 use getter_derive_rs::Getter;

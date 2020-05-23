@@ -1,19 +1,16 @@
-/// Templated Setup Core
-///
-/// Separated setup core chunk for ease of abstraction. Must be percieved as one
-/// unit with the core. It contains additional API calls for templated
-/// setups.
+//! Godwit Core
+//!
+//! General abstraction over the operations used as an API with call
+//! forward wrappers. It contains full API definitions and endpoints to
+//! integrate Godwit core.
 mod setup;
-/// TUI Splash Core
-///
-/// TUI splash procedure core. Dictates the TUI windows and operations.
-pub mod splash;
 
 use crate::{
 	core::setup::{setup_gw_dir, setup_init_state},
 	glyph::Glyph,
 	plugins,
 	statehandler::{self, State},
+	tui,
 };
 use std::{error::Error, io, path::PathBuf};
 
@@ -65,6 +62,6 @@ pub fn switch(glyph: Glyph, default: bool) -> Result<(), Box<dyn Error>> {
 
 /// Forward to splash TUI.
 pub fn runsplash() -> Result<(), io::Error> {
-	splash::run()?;
+	tui::run()?;
 	Ok(())
 }

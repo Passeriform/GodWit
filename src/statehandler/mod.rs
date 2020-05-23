@@ -1,3 +1,6 @@
+//! Godwit State Handler
+//!
+//! A core state management utility for context switching and global singletons.
 use crate::errors::StateError;
 use crate::glyph::Glyph;
 use crate::settings;

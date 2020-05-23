@@ -1,3 +1,6 @@
+//! Errors
+//!
+//! Errors for Godwit suite and services.
 use custom_error::custom_error;
 use std::fmt;
 

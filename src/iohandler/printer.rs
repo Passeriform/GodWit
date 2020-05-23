@@ -1,3 +1,6 @@
+//! Printer
+//!
+//! Controls input and read operations. Utility abstraction over general stdio input/read operations.
 use crate::errors::StateError;
 use crate::statehandler::State;
 use log::info;

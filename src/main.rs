@@ -1,42 +1,6 @@
 // TODO: Documentation
 // TODO: Pattern matching for errors in this file
-/// Utility functions and macros
-pub mod _utils; // TODO: Ugly naming fix for fmt
-/// Godwit Core
-///
-/// General abstraction over the operations used as an API with call
-/// forward wrappers. It contains full API definitions and endpoints to
-/// integrate Godwit core.
-pub mod core;
-/// Errors
-///
-/// Errors for Godwit suite and services.
-pub mod errors;
-/// Glyphs Implementation
-///
-/// Defines glyph as core of Godwit's datatype of choice. Implementations
-/// support borrow lifecyle and can be serialized.
-pub mod glyph;
-/// I/O Handler
-///
-/// Custom wrapper handler over generic printer and scanner for terminal and HID
-/// interfaces.
-pub mod iohandler;
-/// Plugin Interface
-///
-/// A composite processor for all godwit-compatible plugins.
-/// Must follow a unified standard to keep minimal deviation.
-pub mod plugins;
-/// Godwit Settings Management
-///
-/// A utility abstraction over persistent settings and access methods.
-pub mod settings;
-/// Godwit State Handler
-///
-/// A core state management utility for context switching and global singletons.
-pub mod statehandler;
-
-use crate::glyph::Glyph;
+use godwit::{glyph::Glyph, *};
 use log::{debug, error, info};
 use simplelog::*;
 use std::path::PathBuf;

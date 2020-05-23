@@ -1,3 +1,8 @@
+//! Templated Setup Core
+//!
+//! Separated setup core chunk for ease of abstraction. Must be percieved as one
+//! unit with the core. It contains additional API calls for templated
+//! setups.
 use crate::{
 	errors::{SettingsError, SettingsMode, StateError},
 	settings::{self, Settings},

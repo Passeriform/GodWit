@@ -1,3 +1,6 @@
+//! Scanner
+//!
+//! Controls output and write operations. Utility abstraction over general stdio output/write operations.
 use std::{
 	fs::File,
 	io::{BufRead, BufReader, Lines, Result},

@@ -1,3 +1,6 @@
+//! TUI Splash Core
+//!
+//! TUI splash procedure core. Dictates the TUI windows and operations.
 #![allow(unused_must_use)]
 use crate::iohandler::scanner;
 use crossterm::{
@@ -30,7 +33,7 @@ pub fn run() -> Result<(), io::Error> {
 	term.clear();
 
 	let mut draw_state = DrawState {
-		list_items: vec!["Item 1", "Item 2", "Item 3"],
+		list_items: vec!["Init", "Add", "Remove", "Switch"],
 		selected_item: 0,
 	};
 
@@ -63,8 +66,9 @@ fn enter_pressed(_state: &mut DrawState) {
 /// Exit subroutine.
 fn exit_routine(term: &mut Terminal<CrosstermBackend<io::Stdout>>, _state: &mut DrawState) {
 	// Add exit coroutines and subwindows
-	terminal::disable_raw_mode();
+	term.clear();
 	term.show_cursor();
+	terminal::disable_raw_mode();
 	debug!("Nice chirping... Bye!");
 	process::exit(1);
 }
@@ -115,8 +119,7 @@ pub fn draw(
 			.split(f.size());
 
 		let art_para =
-			scanner::parse_art("assets/godwit_text_title_thin.ans", f.size().width as usize)
-				.unwrap_or_default();
+			scanner::parse_art("assets/ansi/art.ans", f.size().width as usize).unwrap_or_default();
 
 		Paragraph::new(
 			art_para
