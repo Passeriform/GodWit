@@ -12,6 +12,10 @@ exclude = [
 ]
 edition = "2018"
 
+[lib]
+name = "godwit"
+path = "src/lib.rs"
+
 [[bin]]
 name = "godwit"
 path = "src/main.rs"
