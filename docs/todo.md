@@ -37,5 +37,6 @@
 ☐   Quick Fixes
     ☐   Complete Core::Status
     ☐   Fix _utils naming problem with fmt
+    ☐   Modify function to accept generics in traits
 
 ☐   Create symlinks if working directory does not equate to default `.godwit`
