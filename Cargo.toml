@@ -1,16 +1,21 @@
 [package]
 name = "godwit"
-description = "A project-state tracking suite."
+description = "A hackable yet sane project manager and automation suite."
 version = "0.1.0"
 authors = ["Utkarsh Bhardwaj (Passeriform) <passeriform.ub@gmail.com>"]
 readme = "README.md"
-license = "MIT"
+keywords = ["project", "management", "automation", "tracker", "suite"]
+categories = ["command-line-utilities", "config", "data-structures"]
+license = "MIT OR Apache"
 repository = "https://github.com/Passeriform/GodWit"
 homepage = "https://www.passeriform.com/prod/GodWit"
 exclude = [
 "assets/*"
 ]
 edition = "2018"
+
+[badges]
+travis-ci = { repository = " Passeriform/GodWit" }
 
 [lib]
 name = "godwit"
@@ -19,6 +24,10 @@ path = "src/lib.rs"
 [[bin]]
 name = "godwit"
 path = "src/main.rs"
+
+[[test]]
+name = "integration"
+path = "tests/tests.rs"
 
 [dependencies]
 custom_error = "1.7.1"
