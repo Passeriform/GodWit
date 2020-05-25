@@ -1,19 +1,15 @@
 ## Release Checklist
 
--   Run `cargo update` and review dependency updates. Commit updated
-    `Cargo.lock`.
+-   Run `cargo update` and review dependency updates.
 -   Run `cargo outdated` and review semver incompatible updates.
--   Review changes for every crate since the last release.
-    If no changes are found, create a release. Else, run the whole process after updating the dependent crates
--   Edit `Cargo.toml` to change the crate version. Run
-    `cargo update -p godwit` so that the `Cargo.lock` is updated. Commit the
-    changes and create a new signed tag.
--   Wait for CI to finish creating the release. If the release build fails, then
-    delete the tag from GitHub, make fixes, re-tag, delete the release and push.
+-   Run `cargo deadlinks` and update dead links if any.
+-   Review changes for every dependency crate since the last release.
+    If no changes are found, create a release. Else, run the whole process after updating the dependent crates.
+-   Edit `Cargo.toml`, `docs/manpage/godwit.1.txt.tpl`, `PKGBUILD` and `pkg/brew/godwit-bin.rb` to change the version. Run `cargo update -p godwit` to reflect in local `Cargo-lock.toml` and create a new signed tag.
+-   Wait for Travis and GitHub Actions to finish CI tests and  creating the release. If the release build fails, then, delete the tag from GitHub, make fixes, re-tag, delete the release and push.
 -   Copy the relevant section of the CHANGELOG to the tagged release notes.
--   Run `ci/build-deb` locally and manually upload the deb package to the
-    release.
--   Run `cargo publish`.
--   Run `ci/sha256-releases {VERSION} >> pkg/brew/godwit-bin.rb`. Then edit
+-   Run `scripts/pre-publish` locally and manually upload the Debian and Arch package to the release.
+-   Check if Travis published the new version. If not, check if tests failed for Travis. In case of unresolvable issue, manually run `cargo publish`.
+-   Run `scripts/sha256-releases {VERSION} >> pkg/brew/godwit-bin.rb`. Then edit
     `pkg/brew/ripgrep-bin.rb` to update the version number and sha256 hashes.
     Remove extraneous stuff added by `ci/sha256-releases`. Commit changes.
