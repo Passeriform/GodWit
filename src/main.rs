@@ -4,9 +4,9 @@ use godwit::{glyph::Glyph, *};
 use log::{debug, error, info};
 use simplelog::*;
 use std::path::PathBuf;
-use structopt::{clap::Shell, StructOpt};
+use structopt::StructOpt;
 
-// Define CLI syntaxes.
+/// Define CLI syntaxes.
 #[derive(Debug, StructOpt)]
 #[structopt(
 	name = "Godwit",
@@ -126,8 +126,6 @@ fn get_log_level(quiet: bool, verbosity: u64) -> LevelFilter {
 
 /// Main entry point
 fn main() {
-	CliArgs::clap().gen_completions(env!("CARGO_PKG_NAME"), Shell::Bash, "target");
-
 	let args = CliArgs::from_args();
 
 	// Application globals
