@@ -2,5 +2,5 @@ blank_issues_enabled: true
 contact_links:
   - name: Ask a question
     about: |
-      You've come to seek help or want to discuss about godwit.
+      You've come to seek help or want to discuss about GodWit.
     url: https://github.com/Passeriform/GodWit/discussions/new

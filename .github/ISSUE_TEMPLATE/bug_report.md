@@ -1,9 +1,8 @@
 ---
 name: Bug report
-about: An issue with godwit or any of its dependencies (gw-plugin, godwit-daemon, getter-derive-rs , etc.)
+about: An issue with godwit.
 title: ''
 labels: ''
-assignees: ''
 ---
 
 
@@ -13,7 +12,20 @@ Replace this text with the output of `godwit --version`.
 
 #### What operating system are you using godwit on?
 
-Replace this text with your operating system and version.
+Replace this block with your operating system and version.
+
+Linux:
+```bash
+uname -a
+```
+Windows:
+```batch
+systeminfo
+```
+Mac:
+```zsh
+sw_vers
+```
 
 #### Describe your bug.
 
@@ -21,26 +33,24 @@ Give a high level description of the bug.
 
 #### What are the steps to reproduce the behavior?
 
-If possible, please include both your search patterns and the corpus on which
-you are searching. Unless the bug is very obvious, then it is unlikely that it
-will be fixed if it cannot be reproduced.
+List down the detailed steps required to reproduce the problem. Unless the bug is very obvious, it is unlikely that it will be fixed if it cannot be reproduced.
 
 #### What is the actual behavior?
 
-Show the command you ran and the actual output. Include the `-vvv` flag in
-your invocation of ripgrep.
+Include both the output of `godwit status -vvv` and the command you ran with a `-vvv` flag within code fence.
 
-If the output is large, put it in a gist: https://gist.github.com/
+  ```
+  $ godwit <command called> <options supplied> -vvv
 
-If the output is small, put it in code fences:
+  <unaltered copied output>
+  ```
 
-```
-your
-output
-goes
-here
-```
+If the output is large, put it in a [gist](https://gist.github.com/) and put a link here.
 
 #### What is the expected behavior?
 
-What do you think godwit should have done?
+What do you think GodWit should have done?
+
+#### Any speculation or footnotes?
+
+We welcome any and every input from the user.
