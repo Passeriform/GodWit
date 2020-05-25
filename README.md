@@ -1,60 +1,86 @@
 # GodWit
-A hackable yet sane project manager and automation suite.
+A hackable yet sane project manager and automation suite. GodWit follows an unintrusive philosophy with maximal exposure points to get the best of both end-user and developer worlds.
 
+## Install
+GodWit is available on AUR and PPA repositories.
 
-> A hackable yet sane project manager and automation suite. GodWit is designed to provide minimal intrusion functionality with equally accessible and interpretable developer access.
-
-
-![screenshot](screenshot.png)
-
-## Setup
-
-### Install
-
-GodWit suite (at least its core) requires Rust 2018 in order to build/install. If you need to install Rust, follow [these instructions](https://www.rust-lang.org/en-US/install.html). Once you have Rust installed, TimeTrack can be installed by running the command below:
-
+Simply install it using
+```bash
+$ yay -Syu godwit
 ```
-cargo install timetrack
+OR
+```bash
+$ sudo add-apt-repository ppa:passeriform/ppa
+$ sudo apt update
+$ sudo apt install godwit
 ```
-
-### Configure tracking path(s)
-
-By default, TimeTrack is configured to watch your home directory. You will likely want to reconfigure TimeTrack to watch whichever directory you use to store your projects. After installing TimeTrack, run `timetrack config` to find the `User configuration` file. Edit that file to configure TimeTrack to watch the appropriate directory (or directories if you have multiple, note that at this time TimeTrack does not support watching directories which are nested within one another). As an example, the full contents of my TimeTrack configuration file are `track_paths = ["/Users/josh/Projects"]`. After editing the configuration file, run `timetrack config` again to confirm the `Tracking paths` are displayed correctly.
-
-### Automatic startup
-
-The `timetrack track` command starts TimeTrack in tracking mode. This should be running any time you want to track time. While you can manually start/stop this process, it is recommended that you configure your system to start this process automatically on startup. The specific steps to do this will depend on your OS. On OSX you can use `timetrack schedule` after TimeTrack has been installed to configure it to start tracking every time the current use logs in.  
 
 ## Use
+Begin with initializing GodWit on your general working directory.
 
 ```bash
-    # to start time tracking
-    timetrack track
-
-    # to see the results
-    timetrack
-
-    # to clear the tracking history
-    timetrack clear
-
-    # to view the configuration
-    timetrack config
-
-    # to configure TimeTrack to start tracking every time the current user logs in
-    # currently only supported on OSX
-    timetrack schedule
-
-    # to disable TimeTrack from starting every time the current user logs in
-    # currently only supported on OSX
-    timetrack unschedule
+$ godwit init
 ```
+
+Try adding a new project.
+
+```bash
+$ godwit add @organization/project ~/projects/project
+```
+
+GodWit automatically tracks the project for any development and gives a rundown of the info after tracking.
+
+```bash
+$ godwit status -v
+```
+
+## Packages
+  - GodWit-Daemon - A dedicated runner for handling processes. [https://github.com/Passeriform/GodWit-Daemon](https://github.com/Passeriform/GodWit-Daemon)
+
+## Plugins
+
+- Weaver - A templated boilerplate builder. [https://github.com/Passeriform/Weaver](https://github.com/Passeriform/Weaver)
+
+## Development
+If you want to contribute, start by cloning this repository.
+```bash
+    git clone https://github.com/Passeriform/GodWit Godwit
+```
+Checkout to a new branch.
+```bash
+    # Use kebab-case categorization format.
+
+
+    # Ex: A new feature.
+    git checkout feature-<feature>
+
+    # Ex: A bugfix.
+    git checkout bugfix-<bug>
+
+    # Ex: A meta update.
+    git checkout meta-<title>
+
+    # Ex: A documentation update.
+    git checkout docs-<title>
+
+    # Ex: A CI update.
+    git checkout ci-<title>
+
+```
+Do your thing...
+
+```bash
+Code up
+```
+**Squash commits** and issue a PR at
+[https://github.com/Passeriform/GodWit](https://github.com/Passeriform/GodWit)
 
 ## License
 
 Licensed under either of
 
- * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
  * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
 
 at your option.
 
