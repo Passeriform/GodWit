@@ -1,0 +1,207 @@
+#compdef godwit
+
+autoload -U is-at-least
+
+_godwit() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+":: :_godwit_commands" \
+"*::: :->Godwit" \
+&& ret=0
+    case $state in
+    (Godwit)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:godwit-command-$line[1]:"
+        case $line[1] in
+            (init)
+_arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'--headless[Headless setup]' \
+'--refresh[Purge existing settings before setup]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+'::target -- Target path to godwit directory (Will bind a symlink):_files' \
+&& ret=0
+;;
+(switch)
+_arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'--default[Use as default project]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+':glyph -- Glyph (@organization/project):_files' \
+&& ret=0
+;;
+(add)
+_arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'-e[Add existing project (Doesn'\''t trigger weaver)]' \
+'--existing[Add existing project (Doesn'\''t trigger weaver)]' \
+'--active[Add as active project]' \
+'--default[Add as default project]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+':glyph -- Glyph (@organization/project):_files' \
+':location -- Working path for project:_files' \
+&& ret=0
+;;
+(remove)
+_arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+':glyph -- Select glyph (@organization/project):_files' \
+&& ret=0
+;;
+(status)
+_arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" \
+'-o+[Organization (for all operations) (Overrides glyph)]' \
+'--org=[Organization (for all operations) (Overrides glyph)]' \
+'-p+[Project in organization (for all operations) (Overrides glyph)]' \
+'--project=[Project in organization (for all operations) (Overrides glyph)]' \
+'-h[Prints help information]' \
+'--help[Prints help information]' \
+'-V[Prints version information]' \
+'--version[Prints version information]' \
+'(-v --verbose)-q[Silence all output]' \
+'(-v --verbose)--quiet[Silence all output]' \
+'(-q --quiet)*-v[Debug mode]' \
+'(-q --quiet)*--verbose[Debug mode]' \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_godwit_commands] )) ||
+_godwit_commands() {
+    local commands; commands=(
+        "init:Setup Godwit working directory" \
+"switch:Switch to target glyph, organization or project" \
+"add:Add projects under Godwit" \
+"remove:Remove projects under Godwit" \
+"status:Display Godwit's status" \
+"help:Prints this message or the help of the given subcommand(s)" \
+    )
+    _describe -t commands 'godwit commands' commands "$@"
+}
+(( $+functions[_godwit__add_commands] )) ||
+_godwit__add_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'godwit add commands' commands "$@"
+}
+(( $+functions[_godwit__help_commands] )) ||
+_godwit__help_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'godwit help commands' commands "$@"
+}
+(( $+functions[_godwit__init_commands] )) ||
+_godwit__init_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'godwit init commands' commands "$@"
+}
+(( $+functions[_godwit__remove_commands] )) ||
+_godwit__remove_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'godwit remove commands' commands "$@"
+}
+(( $+functions[_godwit__status_commands] )) ||
+_godwit__status_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'godwit status commands' commands "$@"
+}
+(( $+functions[_godwit__switch_commands] )) ||
+_godwit__switch_commands() {
+    local commands; commands=(
+        
+    )
+    _describe -t commands 'godwit switch commands' commands "$@"
+}
+
+_godwit "$@"
