@@ -1,7 +1,6 @@
 //! TUI Splash Core
 //!
 //! TUI splash procedure core. Dictates the TUI windows and operations.
-#![allow(unused_must_use)]
 use crate::iohandler::scanner;
 use crossterm::{
 	event::{poll, read, Event, KeyCode},
@@ -25,12 +24,12 @@ pub struct DrawState<'a> {
 	selected_item: usize,
 }
 /// TUI bootstrap
-pub fn run() -> Result<(), io::Error> {
-	terminal::enable_raw_mode();
+pub fn run() -> Result<(), crossterm::ErrorKind> {
+	terminal::enable_raw_mode()?;
 	let backend = CrosstermBackend::new(io::stdout());
 	let mut term = Terminal::new(backend).unwrap();
 
-	term.clear();
+	term.clear()?;
 
 	let mut draw_state = DrawState {
 		list_items: vec!["Init", "Add", "Remove", "Switch"],
@@ -40,7 +39,7 @@ pub fn run() -> Result<(), io::Error> {
 	draw(&mut term, &draw_state).unwrap();
 
 	loop {
-		check_update(&mut term, &mut draw_state);
+		check_update(&mut term, &mut draw_state)?;
 	}
 }
 
@@ -64,11 +63,14 @@ fn enter_pressed(_state: &mut DrawState) {
 }
 
 /// Exit subroutine.
-fn exit_routine(term: &mut Terminal<CrosstermBackend<io::Stdout>>, _state: &mut DrawState) {
+fn exit_routine(
+	term: &mut Terminal<CrosstermBackend<io::Stdout>>,
+	_state: &mut DrawState,
+) -> Result<(), crossterm::ErrorKind> {
 	// Add exit coroutines and subwindows
-	term.clear();
-	term.show_cursor();
-	terminal::disable_raw_mode();
+	term.clear()?;
+	term.show_cursor()?;
+	terminal::disable_raw_mode()?;
 	debug!("Nice chirping... Bye!");
 	process::exit(1);
 }
@@ -85,15 +87,15 @@ pub fn check_update(
 					KeyCode::Up => up_pressed(&mut draw_state),
 					KeyCode::Down => down_pressed(&mut draw_state),
 					KeyCode::Enter => enter_pressed(&mut draw_state),
-					KeyCode::Esc => exit_routine(&mut term, &mut draw_state),
+					KeyCode::Esc => exit_routine(&mut term, &mut draw_state)?,
 					_ => (),
 				}
-				draw(&mut term, &mut draw_state);
+				draw(&mut term, &mut draw_state)?;
 			}
 			Event::Mouse(event) => debug!("{:?}", event),
 			Event::Resize(width, _) => {
 				debug!("{:?}", width);
-				draw(&mut term, &mut draw_state);
+				draw(&mut term, &mut draw_state)?;
 			}
 		}
 	}
@@ -104,8 +106,8 @@ pub fn check_update(
 pub fn draw(
 	term: &mut Terminal<CrosstermBackend<io::Stdout>>,
 	state: &DrawState,
-) -> Result<(), io::Error> {
-	term.hide_cursor();
+) -> Result<(), crossterm::ErrorKind> {
+	term.hide_cursor()?;
 
 	term.draw(|mut f| {
 		let size = f.size();
@@ -141,6 +143,6 @@ pub fn draw(
 			.highlight_style(Style::default().modifier(Modifier::ITALIC))
 			.highlight_symbol(">>")
 			.render(&mut f, chunks[1]);
-	});
+	})?;
 	Ok(())
 }

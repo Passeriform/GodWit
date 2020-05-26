@@ -12,7 +12,7 @@ use crate::{
 	statehandler::{self, State},
 	tui,
 };
-use std::{error::Error, io, path::PathBuf};
+use std::{error::Error, path::PathBuf};
 
 /// One-time Godwit setup call.
 pub fn init(path: Option<PathBuf>, headless: bool, refresh: bool) -> Result<(), Box<dyn Error>> {
@@ -61,7 +61,7 @@ pub fn switch(glyph: Glyph, default: bool) -> Result<(), Box<dyn Error>> {
 }
 
 /// Forward to splash TUI.
-pub fn runsplash() -> Result<(), io::Error> {
+pub fn runsplash() -> Result<(), Box<dyn Error>> {
 	tui::run()?;
 	Ok(())
 }
