@@ -1,7 +1,7 @@
 [package]
 name = "godwit"
 description = "A hackable yet sane project manager and automation suite."
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Utkarsh Bhardwaj (Passeriform) <passeriform.ub@gmail.com>"]
 readme = "README.md"
 keywords = ["project", "management", "automation", "tracker", "suite"]
