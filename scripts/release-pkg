@@ -1,0 +1,5 @@
+#!/bin/sh
+
+checksum=$("$(dirname $(dirname $(realpath $0)) )/scripts/gen-md5" "$1" | awk '/.tar.gz/{print $2}')
+
+sed -i 's/md5sums=(\x27.*\x27)/md5sums=(\x27'$checksum'\x27)/g' "$(dirname $(dirname $(realpath $0)) )/PKGBUILD"

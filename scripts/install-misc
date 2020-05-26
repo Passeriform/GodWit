@@ -1,0 +1,29 @@
+#!/bin/sh
+
+pkgdir=$1
+pkgver=$2
+
+generate_man_page() {
+  if [ -z "$1" ]; then
+      echo "No version supplied"
+      exit 1
+  fi
+
+  TEMPLATE=$PWD/docs/manpage/godwit.tpl
+  OUTTEXT=$PWD/docs/manpage/godwit.txt
+
+  VERSIONHASH=$(git rev-parse --short=10 HEAD)
+
+  sed -e "s/{VERSION}/$1 ($VERSIONHASH)/g" $TEMPLATE > $OUTTEXT
+
+  if hash asciidoctor 2>/dev/null; then
+    asciidoctor --doctype manpage --backend manpage $OUTTEXT || (echo "ASCIIDoctor threw error" && exit 1)
+  else
+    a2x --doctype manpage --format manpage --no-xmllint $OUTTEXT || (echo "a2x threw error" && exit 1)
+  fi
+
+  rm $OUTTEXT
+}
+
+generate_man_page $pkgver
+mv $PWD/docs/godwit.1 $pkgdir/usr/local/man/man1/

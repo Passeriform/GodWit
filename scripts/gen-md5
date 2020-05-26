@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -e
+
+if [ $# != 1 ]; then
+  echo "Usage: $(basename $0) version" >&2
+  exit 1
+fi
+version="$1"
+
+for ext in zip tar.gz; do
+  url="https://github.com/Passeriform/GodWit/archive/v$version.$ext"
+  md5=$(curl -sfSL "$url" | md5sum)
+  echo "source.$ext $md5"
+done
