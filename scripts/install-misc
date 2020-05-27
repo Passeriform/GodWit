@@ -26,4 +26,4 @@ generate_man_page() {
 }
 
 generate_man_page $pkgver
-mv $PWD/docs/godwit.1 $pkgdir/usr/local/man/man1/
+mv $PWD/docs/manpage/godwit.1 $pkgdir/usr/local/man/man1/
