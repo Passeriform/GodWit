@@ -1,6 +1,19 @@
 # GodWit
 A hackable yet sane project manager and automation suite. GodWit follows an unintrusive philosophy with maximal exposure points to get the best of both end-user and developer worlds.
 
+Godwit is a config driven project assets and states manager suite. It supports a pluggable
+environment to work with multiple plugins. Godwit also features diff-snipping to
+trim out unwanted operations from track history. This command is a cli front to
+godwit core, daemon and other plugins.
+
+It tracks changes in applications across the system deemed crucial for project
+development. The application can be used as knowledge compilation tool and can be
+used to provide meaningful analytics on projects.
+
+Godwit uses terms like state to represent a container that can either
+contain a project and its details or another such container. The complete list of
+all such containers is represented using a state-graph.
+
 ## Install
 GodWit is available on AUR and PPA repositories.
 
@@ -33,13 +46,6 @@ GodWit automatically tracks the project for any development and gives a rundown 
 ```bash
 $ godwit status -v
 ```
-
-## Packages
-  - GodWit-Daemon - A dedicated runner for handling processes. [https://github.com/Passeriform/GodWit-Daemon](https://github.com/Passeriform/GodWit-Daemon)
-
-## Plugins
-
-- Weaver - A templated boilerplate builder. [https://github.com/Passeriform/Weaver](https://github.com/Passeriform/Weaver)
 
 ## Development
 If you want to contribute, start by cloning this repository.
