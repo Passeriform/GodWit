@@ -15,9 +15,9 @@ class GodwitBin < Formula
 
   def install
     bin.install "godwit"
-    man1.install "doc/godwit.1"
+    man1.install "docs/godwit.1"
 
-    bash_completion.install "complete/godwit.bash"
-    zsh_completion.install "complete/godwit.zsh"
+    bash_completion.install "completions/godwit.bash"
+    zsh_completion.install "completions/godwit.zsh"
   end
 end
