@@ -5,9 +5,9 @@ pkgrel=1
 pkgdesc="A hackable yet sane project manager and automation suite."
 arch=('x86_64' 'i686' 'armv6h' 'armv7h')
 url="https://www.passeriform.com/prod/GodWit"
-license=('MIT OR Apache')
+license=('MIT' 'Apache-2.0')
 depends=(
-# 'godwit-daemon'
+        # 'godwit-daemon'
          # 'weaver'
          )
 makedepends=('rust' 'cargo')
