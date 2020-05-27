@@ -1,19 +1,16 @@
----
 language: rust
 cache: cargo
 rust:
-  - stable
-  - beta
-  - nightly
+- stable
+- beta
+- nightly
 jobs:
   allow_failures:
-    - rust: nightly
+  - rust: nightly
   fast_finish: true
 deploy:
   provider: cargo
+  on:
+    tags: true
   token:
-    secure: >-
-      K6+xlBUEaiy96goOyHmCDi0eaZWYHuB9wmwVZa+qGtSW/6QhjZ++63PpDQrcqFfBWD6O/3B+IsLSXZEt5Qfe3+ADZZ60Y1pHM1KIoLBwE2JMP78F+Yl7zdYkMPr0P095CQyufpT0DtfQdBrASjt3JwIugOI2rzHJbc9hk1fqOXDP9BgniiLFzsNPSeajdh4zYVwuXACwJ1GPLYag6tMRtOs6bmCl8vWFo1EVLBkKr2y3AiXsHm3wZVoaxhbwhvjcFnuN6YnW5qjKWW0fxDSrNLPAq6iyIZYuP5+Z3C2YDiceZh2iPmL3upwE+W/6aMBH/II7EIc+e73bSLZXOu0hU/uyDMeZNCQ5KdXQRhGeMpRJh6uQTS48OTuKan2fdkJJTgJquU0lik9MmjOXtgrMrE6h/tLiYAl8NFhMM1PBFX8yvN0ffS4GWwB+F5EYhyYUARGdhreOrPdSpimz22dQUvppo/wY46SW3aehamLBZlthcBoqEAbABWKGJyTZmZUPwzkpzQGhNfo3NeiPPBcgw4XhbA9E6WPdh1BIPqWrtpyB6WOHBf5SqE3ElliqZz0QbKEh0BAtGDADfUzgF7IGHmWRL3lcE3UC9ZQ/JzuITBNQnUmlhBB63c5+thLR70o4TB9MXWmlrdIprDhs4gMUBJv3WVpkqVnQ80qClQ/rqFA=
-    on:
-      tags: true
----
+    secure: g97VmvTRk7ETxJBgDcnfqV3olwFCDbZyj1bEIss7ORbcwp4eyK1wUb4p02mqTBydtLcyXVIxWxN8Rh4PW1PtugHAA+9FvfhyqO74BqrC/Gak2u/YOpiqaCpuupDCp7o0OkvPGU0HV8StS/3uF+awTBOGo2uDAsaIX6JIQG02EsbTH0QeB0vuncf+f+CRSTA1Q+QEKAe1TvVNFYRQ3PpOY2E1lzMbTu80ISIgI8Ctimq15UbHxS3/qVEqlaeeYdNVJVcQZKG/Al59EQSRQsmBUedyAgdACAX9sznB2ndUxMkhRCLadLUNQ5Lzuh4IWFFwUFEhytULTey/lo1zBc2nYV8R/SeKuQLy24yjPJd31PXusjvU6EFRFRgXRknBfpIHHyENOTA2EUQ/sH3xUDuZxKehZ31bpptXLdMiLL8M+vcQKG3BZ+HRcizImnAzcwoM6l8Q/30am2vttCu0l9jKtGQ2u90IRxBl6CYXpkE/P3+PkJJSqjgaY5Ej065XOUWYbWD06mMCeuAAA9n14cryNVrTpuJi1ns5v1gcpOtPc0xSPwJaALrW3V/b4kbjKd/lssWr6M6uIq4VBRSWSRW+KKFqWmOicQttXb88PAsI2M68l8YaHASyYWpnkeBGLgU7CvtEcmVdj2zuvboTsvizWqBSHMqX9TOYG8YNSEEErvw=
