@@ -76,7 +76,9 @@ impl Settings {
 		for state_file_path in glob(&(save_state_path.to_string_lossy().into_owned() + "/*.gwsg"))?
 		{
 			return Ok(state_file_path.unwrap_or_else(|_| {
-				[&save_state_path, &PathBuf::from("active.gwsg")]
+				save_state_path
+					.as_path()
+					.join("active.gwsg")
 					.iter()
 					.collect()
 			}));
@@ -97,14 +99,16 @@ impl Settings {
 		let settings_path: PathBuf;
 
 		if self.headless {
-			settings_path = [&working_dir, &PathBuf::from(".gwrc")].iter().collect();
+			settings_path = working_dir.as_path().join(".gwrc").iter().collect();
 
 			if !upsert {
 				return Err(SettingsError::DisallowedUpsert.into());
 			}
 		} else {
 			let states_dir = &self.states_dir.clone().unwrap_or_default();
-			settings_path = [&working_dir, &PathBuf::from("settings.gwcore")]
+			settings_path = working_dir
+				.as_path()
+				.join("settings.gwcore")
 				.iter()
 				.collect();
 
@@ -131,9 +135,9 @@ impl Default for Settings {
 			dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
 		);
 
-		let working_dir = [&home_dir, &PathBuf::from(".godwit")].iter().collect();
+		let working_dir: PathBuf = home_dir.as_path().join(".godwit").iter().collect();
 
-		let states_dir: PathBuf = [&working_dir, &PathBuf::from("states")].iter().collect();
+		let states_dir: PathBuf = working_dir.as_path().join("states").iter().collect();
 
 		let plugins = Default::default();
 
@@ -153,11 +157,13 @@ pub fn get_settings() -> Result<Settings, Box<dyn Error>> {
 		dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
 	);
 
-	let working_dir: PathBuf = [&home_dir, &PathBuf::from(".godwit")].iter().collect();
+	let working_dir: PathBuf = home_dir.as_path().join(".godwit").iter().collect();
 
-	let rc_path: PathBuf = [&home_dir, &PathBuf::from(".gwrc")].iter().collect();
+	let rc_path: PathBuf = home_dir.as_path().join(".gwrc").iter().collect();
 
-	let settings_path: PathBuf = [&working_dir, &PathBuf::from("settings.gwcore")]
+	let settings_path: PathBuf = working_dir
+		.as_path()
+		.join("settings.gwcore")
 		.iter()
 		.collect();
 
@@ -199,11 +205,13 @@ pub fn purge_settings(purge_states: bool) -> Result<(), Box<dyn Error>> {
 		dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
 	);
 
-	let working_dir: PathBuf = [&home_dir, &PathBuf::from(".godwit")].iter().collect();
+	let working_dir: PathBuf = home_dir.as_path().join(".godwit").iter().collect();
 
-	let rc_path: PathBuf = [&home_dir, &PathBuf::from(".gwrc")].iter().collect();
+	let rc_path: PathBuf = home_dir.as_path().join(".gwrc").iter().collect();
 
-	let settings_path: PathBuf = [&working_dir, &PathBuf::from("settings.gwcore")]
+	let settings_path: PathBuf = working_dir
+		.as_path()
+		.join("settings.gwcore")
 		.iter()
 		.collect();
 
