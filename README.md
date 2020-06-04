@@ -1,4 +1,18 @@
 # GodWit
+
+[![crate](https://img.shields.io/crates/v/godwit)](https://crates.io/crates/godwit)
+[![docs](https://docs.rs/godwit/badge.svg)](https://docs.rs/godwit)
+
+[![aur](https://img.shields.io/aur/version/godwit)](https://aur.archlinux.org/packages/godwit)
+[![debian](https://img.shields.io/debian/v/godwit)](https://packages.debian.org/unstable/utils/godwit)
+[![homebrew](https://img.shields.io/homebrew/v/godwit)](https://formulae.brew.sh/formula/godwit)
+
+[![build](https://travis-ci.org/Passeriform/GodWit.svg?branch=master)](https://travis-ci.org/Passeriform/GodWit)
+[![codecov](https://codecov.io/gh/Passeriform/GodWit/branch/master/graph/badge.svg)](https://codecov.io/gh/Passeriform/GodWit)
+[![maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Passeriform/GodWit/graphs/commit-activity)
+
+![license](https://img.shields.io/crates/l/godwit)
+
 A hackable yet sane project manager and automation suite. GodWit follows an unintrusive philosophy with maximal exposure points to get the best of both end-user and developer worlds.
 
 Godwit is a config driven project assets and states manager suite. It supports a pluggable
