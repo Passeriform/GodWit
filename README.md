@@ -2,16 +2,12 @@
 
 [![crate](https://img.shields.io/crates/v/godwit)](https://crates.io/crates/godwit)
 [![docs](https://docs.rs/godwit/badge.svg)](https://docs.rs/godwit)
-
-[![aur](https://img.shields.io/aur/version/godwit)](https://aur.archlinux.org/packages/godwit)
-[![debian](https://img.shields.io/debian/v/godwit)](https://packages.debian.org/unstable/utils/godwit)
-[![homebrew](https://img.shields.io/homebrew/v/godwit)](https://formulae.brew.sh/formula/godwit)
-
 [![build](https://travis-ci.org/Passeriform/GodWit.svg?branch=master)](https://travis-ci.org/Passeriform/GodWit)
 [![codecov](https://codecov.io/gh/Passeriform/GodWit/branch/master/graph/badge.svg)](https://codecov.io/gh/Passeriform/GodWit)
-[![maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Passeriform/GodWit/graphs/commit-activity)
+[![maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Passeriform/GodWit/graphs/commit-activity)
 
-![license](https://img.shields.io/crates/l/godwit)
+[![homepage](https://img.shields.io/website-up-down-green-red/http/passeriform.com.svg?label=Passeriform)](http://www.passeriform.com/prod/GodWit)
+[![repo](https://img.shields.io/badge/github-GodWit-blue?logo=github)](https://github.com/Passeriform/GodWit)
 
 A hackable yet sane project manager and automation suite. GodWit follows an unintrusive philosophy with maximal exposure points to get the best of both end-user and developer worlds.
 
@@ -29,6 +25,11 @@ contain a project and its details or another such container. The complete list o
 all such containers is represented using a state-graph.
 
 ## Install
+[![release](https://img.shields.io/github/release/Passeriform/GodWit.svg)](https://github.com/Passeriform/GodWit/releases/)
+[![aur](https://img.shields.io/aur/version/godwit)](https://aur.archlinux.org/packages/godwit)
+[![debian](https://img.shields.io/debian/v/godwit)](https://packages.debian.org/unstable/utils/godwit)
+[![homebrew](https://img.shields.io/homebrew/v/godwit)](https://formulae.brew.sh/formula/godwit)
+
 GodWit is available on AUR and PPA repositories.
 
 Simply install it using
@@ -61,7 +62,10 @@ GodWit automatically tracks the project for any development and gives a rundown 
 $ godwit status -v
 ```
 
-## Development
+## Contributing
+[![issues](https://img.shields.io/github/issues/Passeriform/GodWit.svg)](https://gitHub.com/Passeriform/GodWit/issues/)
+[![pull-requests](https://img.shields.io/github/issues-pr/Passeriform/GodWit)](https://github.com/Passeriform/GodWit/pulls)
+
 If you want to contribute, start by cloning this repository.
 ```bash
     git clone https://github.com/Passeriform/GodWit Godwit
@@ -96,6 +100,7 @@ Code up
 [https://github.com/Passeriform/GodWit](https://github.com/Passeriform/GodWit)
 
 ## License
+![license](https://img.shields.io/crates/l/godwit-daemon)
 
 Licensed under either of
 
@@ -104,7 +109,7 @@ Licensed under either of
 
 at your option.
 
-### Contribution
+### Credition
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
