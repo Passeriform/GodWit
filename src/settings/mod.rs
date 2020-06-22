@@ -3,7 +3,7 @@
 //! A utility abstraction over persistent settings and access methods.
 use crate::errors::SettingsError;
 use crate::plugins::Plugin;
-use getter_derive_rs::Getter;
+use getter_derive::Getter;
 use glob::glob;
 use log::info;
 use serde::{Deserialize, Serialize};

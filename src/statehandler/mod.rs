@@ -4,7 +4,7 @@
 use crate::errors::StateError;
 use crate::glyph::Glyph;
 use crate::settings;
-use getter_derive_rs::Getter;
+use getter_derive::Getter;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, fs::File, path::PathBuf};
 
