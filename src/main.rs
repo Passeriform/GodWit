@@ -143,8 +143,7 @@ fn main() {
 		get_log_level(quiet, verbosity),
 		Config::default(),
 		TerminalMode::Mixed,
-	)
-	.unwrap()])
+	)])
 	.unwrap();
 
 	match args.operation {

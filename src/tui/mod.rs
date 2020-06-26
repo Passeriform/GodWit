@@ -12,15 +12,13 @@ use tui::{
 	backend::CrosstermBackend,
 	layout::{Alignment, Constraint, Direction, Layout},
 	style::{Color, Modifier, Style},
-	widgets::{Block, Borders, Paragraph, SelectableList, Text, Widget},
+	widgets::{Block, Borders, List, Paragraph, Text, Widget},
 	Terminal,
 };
 
-// TODO: Refactor
-
 /// Global-state for TUI
 pub struct DrawState<'a> {
-	list_items: Vec<&'a str>,
+	list_items: &'a [&'a str],
 	selected_item: usize,
 }
 /// TUI bootstrap
@@ -32,7 +30,7 @@ pub fn run() -> Result<(), crossterm::ErrorKind> {
 	term.clear()?;
 
 	let mut draw_state = DrawState {
-		list_items: vec!["Init", "Add", "Remove", "Switch"],
+		list_items: &["Init", "Add", "Remove", "Switch"],
 		selected_item: 0,
 	};
 
@@ -112,7 +110,8 @@ pub fn draw(
 	term.draw(|mut f| {
 		let size = f.size();
 
-		Block::default().borders(Borders::ALL).render(&mut f, size);
+		let block = Block::default().borders(Borders::ALL);
+		f.render_widget(block, size);
 
 		let chunks = Layout::default()
 			.direction(Direction::Vertical)
@@ -120,29 +119,28 @@ pub fn draw(
 			.constraints([Constraint::Percentage(80), Constraint::Percentage(20)].as_ref())
 			.split(f.size());
 
-		let art_para =
-			scanner::parse_art("assets/ansi/art.ans", f.size().width as usize).unwrap_or_default();
+		let art_para = scanner::parse_art("assets/ansi/art.ans", f.size().width as usize)
+			.unwrap_or_default()
+			.into_iter()
+			.map(|line| Text::raw(line))
+			.collect::<Vec<Text>>();
 
-		Paragraph::new(
-			art_para
-				.into_iter()
-				.map(|line| Text::raw(line))
-				.collect::<Vec<Text>>()
-				.iter(),
+		let art_widget = Paragraph::new(
+			art_para.iter()
 		)
 		.style(Style::default().fg(Color::White).bg(Color::Black))
 		.alignment(Alignment::Center)
-		.wrap(true)
-		.render(&mut f, chunks[0]);
+		.wrap(true);
 
-		SelectableList::default()
+		f.render_widget(art_widget, chunks[0]);
+
+		let operations = List::new(state.list_items.iter().map(|item| Text::raw(*item)))
 			.block(Block::default().title("Operation").borders(Borders::ALL))
-			.items(&state.list_items)
-			.select(Some(state.selected_item))
 			.style(Style::default().fg(Color::White))
 			.highlight_style(Style::default().modifier(Modifier::ITALIC))
-			.highlight_symbol(">>")
-			.render(&mut f, chunks[1]);
+			.highlight_symbol(">>");
+
+		f.render_widget(operations, chunks[1]);
 	})?;
 	Ok(())
 }

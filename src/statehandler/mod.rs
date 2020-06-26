@@ -122,7 +122,7 @@ impl StateGraph {
 
 	/// Commits changes to state-graph file.
 	pub fn propagate(&self) -> Result<(), Box<dyn Error>> {
-		File::open(settings::get_settings()?.get_save_state()?).and_then(|state_file| {
+		File::create(settings::get_settings()?.get_save_state()?).and_then(|state_file| {
 			serde_json::to_writer_pretty(state_file, &self)?;
 			Ok(())
 		})?;
