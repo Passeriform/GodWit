@@ -5,14 +5,13 @@
 //! integrate Godwit core.
 mod setup;
 
-use crate::{
-	core::setup::{setup_gw_dir, setup_init_state},
-	glyph::Glyph,
-	plugins,
-	statehandler::{self, State},
-	tui,
-};
-use std::{error::Error, path::PathBuf};
+use crate::core::setup::{setup_gw_dir, setup_init_state};
+use crate::glyph::Glyph;
+use crate::plugins;
+use crate::statehandler::{self, State};
+use crate::tui;
+use std::error::Error;
+use std::path::PathBuf;
 
 /// One-time Godwit setup call.
 pub fn init(path: Option<PathBuf>, headless: bool, refresh: bool) -> Result<(), Box<dyn Error>> {
@@ -51,10 +50,10 @@ pub fn list() -> Result<Vec<State>, Box<dyn Error>> {
 
 /// Switch to another project under Godwit.
 pub fn switch(glyph: Glyph, default: bool) -> Result<(), Box<dyn Error>> {
-	statehandler::set_active(&glyph)?;
+	statehandler::set_active(glyph.clone())?;
 
 	if default {
-		statehandler::set_default(&glyph)?;
+		statehandler::set_default(glyph.clone())?;
 	}
 
 	Ok(())

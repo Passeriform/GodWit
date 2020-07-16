@@ -1,11 +1,9 @@
 //! Scanner
 //!
 //! Controls output and write operations. Utility abstraction over general stdio output/write operations.
-use std::{
-	fs::File,
-	io::{BufRead, BufReader, Lines, Result},
-	path::Path,
-};
+use std::fs::File;
+use std::io::{BufRead, BufReader, Lines, Result};
+use std::path::Path;
 
 /// Collect bytes from ANSI document and return io::Lines.
 pub fn read_ansi<P>(filename: P) -> Result<Lines<BufReader<File>>>

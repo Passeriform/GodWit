@@ -3,13 +3,13 @@
 //! Separated setup core chunk for ease of abstraction. Must be percieved as one
 //! unit with the core. It contains additional API calls for templated
 //! setups.
-use crate::{
-	errors::{SettingsError, SettingsMode, StateError},
-	settings::{self, Settings},
-	statehandler::{self, StateGraph},
-};
+
+use crate::errors::{SettingsError, SettingsMode, StateError};
+use crate::settings::{self, Settings};
+use crate::statehandler::{self, StateGraph};
 use log::info;
-use std::{error::Error, path::PathBuf};
+use std::error::Error;
+use std::path::PathBuf;
 
 /// Setup working directory and initialize settings.
 pub fn setup_gw_dir(
@@ -23,7 +23,7 @@ pub fn setup_gw_dir(
 
 	settings::get_settings()
 		.and_then(|settings| {
-			if settings.headless {
+			if settings.get_headless() {
 				return Err(SettingsError::SettingsAlreadyExists {
 					mode: SettingsMode::Headless,
 				}

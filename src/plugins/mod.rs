@@ -6,13 +6,13 @@ use crate::errors::{IOError, PluginError};
 use crate::settings;
 use getter_derive::Getter;
 use serde::{Deserialize, Serialize};
-use std::{
-	error::Error,
-	process::{Command, Output, Stdio},
-};
+use std::error::Error;
+use std::process::{Command, Output, Stdio};
+
+// TODO: Convert this into a trait
 
 /// Plugin structure
-#[derive(Debug, Deserialize, Serialize, Getter, Clone)]
+#[derive(Clone, Debug, Deserialize, Serialize, Getter)]
 #[serde(rename_all = "snake_case")]
 pub struct Plugin {
 	name: String,

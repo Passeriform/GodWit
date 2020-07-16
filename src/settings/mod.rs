@@ -7,21 +7,19 @@ use getter_derive::Getter;
 use glob::glob;
 use log::info;
 use serde::{Deserialize, Serialize};
-use std::{
-	error::Error,
-	fs::{self, File},
-	path::PathBuf,
-};
+use std::error::Error;
+use std::fs::{self, File};
+use std::path::PathBuf;
 
 /// Define godwit settings.
-#[derive(Debug, Deserialize, Serialize, Getter)]
+#[derive(Clone, Debug, Deserialize, Serialize, Getter)]
 #[serde(rename_all = "snake_case")]
 pub struct Settings {
-	pub working_dir: Option<PathBuf>,
-	pub states_dir: Option<PathBuf>,
-	pub headless: bool,
-	pub switch_on_add: bool,
-	pub plugins: Vec<Plugin>,
+	working_dir: Option<PathBuf>,
+	states_dir: Option<PathBuf>,
+	headless: bool,
+	switch_on_add: bool,
+	plugins: Vec<Plugin>,
 }
 
 impl Settings {
@@ -33,9 +31,9 @@ impl Settings {
 		switch_on_add: bool,
 		plugins: Option<Vec<Plugin>>,
 	) -> Self {
-		let home_dir = PathBuf::from(
-			dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
-		);
+		let home_dir =
+			dirs::home_dir().expect("Home couldn't be located in current $PATH variables.");
+
 		let plugins = plugins.unwrap_or(Default::default());
 
 		let _working_dir;
@@ -75,13 +73,7 @@ impl Settings {
 
 		for state_file_path in glob(&(save_state_path.to_string_lossy().into_owned() + "/*.gwsg"))?
 		{
-			return Ok(state_file_path.unwrap_or_else(|_| {
-				save_state_path
-					.as_path()
-					.join("active.gwsg")
-					.iter()
-					.collect()
-			}));
+			return Ok(state_file_path.unwrap_or_else(|_| save_state_path.join("active.gwsg")));
 		}
 
 		save_state_path.push("active.gwsg");
@@ -99,18 +91,14 @@ impl Settings {
 		let settings_path: PathBuf;
 
 		if self.headless {
-			settings_path = working_dir.as_path().join(".gwrc").iter().collect();
+			settings_path = working_dir.join(".gwrc");
 
 			if !upsert {
 				return Err(SettingsError::DisallowedUpsert.into());
 			}
 		} else {
 			let states_dir = &self.states_dir.clone().unwrap_or_default();
-			settings_path = working_dir
-				.as_path()
-				.join("settings.gwcore")
-				.iter()
-				.collect();
+			settings_path = working_dir.join("settings.gwcore");
 
 			if !states_dir.exists() {
 				fs::create_dir_all(states_dir)?;
@@ -131,13 +119,12 @@ impl Settings {
 
 impl Default for Settings {
 	fn default() -> Self {
-		let home_dir = PathBuf::from(
-			dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
-		);
+		let home_dir =
+			dirs::home_dir().expect("Home couldn't be located in current $PATH variables.");
 
-		let working_dir: PathBuf = home_dir.as_path().join(".godwit").iter().collect();
+		let working_dir = home_dir.join(".godwit");
 
-		let states_dir: PathBuf = working_dir.as_path().join("states").iter().collect();
+		let states_dir = working_dir.join("states");
 
 		let plugins = Default::default();
 
@@ -153,19 +140,13 @@ impl Default for Settings {
 
 /// Get settings instance from settings source file.
 pub fn get_settings() -> Result<Settings, Box<dyn Error>> {
-	let home_dir = PathBuf::from(
-		dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
-	);
+	let home_dir = dirs::home_dir().expect("Home couldn't be located in current $PATH variables.");
 
-	let working_dir: PathBuf = home_dir.as_path().join(".godwit").iter().collect();
+	let working_dir = home_dir.join(".godwit");
 
-	let rc_path: PathBuf = home_dir.as_path().join(".gwrc").iter().collect();
+	let rc_path = home_dir.as_path().join(".gwrc");
 
-	let settings_path: PathBuf = working_dir
-		.as_path()
-		.join("settings.gwcore")
-		.iter()
-		.collect();
+	let settings_path = working_dir.join("settings.gwcore");
 
 	if rc_path.exists() {
 		info!("Godwitrc found at {}", rc_path.display());
@@ -201,19 +182,13 @@ pub fn get_settings() -> Result<Settings, Box<dyn Error>> {
 
 /// Purges settings source file and states.
 pub fn purge_settings(purge_states: bool) -> Result<(), Box<dyn Error>> {
-	let home_dir = PathBuf::from(
-		dirs::home_dir().expect("Home couldn't be located in current $PATH variables."),
-	);
+	let home_dir = dirs::home_dir().expect("Home couldn't be located in current $PATH variables.");
 
-	let working_dir: PathBuf = home_dir.as_path().join(".godwit").iter().collect();
+	let working_dir = home_dir.join(".godwit");
 
-	let rc_path: PathBuf = home_dir.as_path().join(".gwrc").iter().collect();
+	let rc_path = home_dir.join(".gwrc");
 
-	let settings_path: PathBuf = working_dir
-		.as_path()
-		.join("settings.gwcore")
-		.iter()
-		.collect();
+	let settings_path: PathBuf = working_dir.join("settings.gwcore");
 
 	if rc_path.exists() {
 		info!("Purging {}", rc_path.display());

@@ -6,9 +6,11 @@ use crate::glyph::Glyph;
 use crate::settings;
 use getter_derive::Getter;
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fs::File, path::PathBuf};
+use std::error::Error;
+use std::fs::File;
+use std::path::PathBuf;
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub enum Status {
 	// TODO: Elaborate enums into impl
 	Active,
@@ -19,12 +21,12 @@ pub enum Status {
 }
 
 /// Defines a singular project and its corresponding state.
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Getter)]
 #[serde(rename_all = "snake_case")]
 pub struct State {
-	pub glyph: Glyph,
-	pub directory: Option<PathBuf>,
-	pub status: Option<Vec<Status>>,
+	glyph: Glyph,
+	directory: Option<PathBuf>,
+	status: Option<Vec<Status>>,
 }
 
 impl Default for State {
@@ -38,7 +40,7 @@ impl Default for State {
 }
 
 /// Defines combination of multiple states and represents the snapshot of the application.
-#[derive(Debug, Deserialize, Serialize, Getter)]
+#[derive(Clone, Debug, Deserialize, Serialize, Getter)]
 #[serde(rename_all = "snake_case")]
 pub struct StateGraph {
 	default: Option<State>,
@@ -64,26 +66,26 @@ impl StateGraph {
 	}
 
 	/// Sets the active state in a state-graph.
-	pub fn active(&mut self, state: &State) -> &mut Self {
-		self.active = Some(state.clone());
+	pub fn active(&mut self, state: State) -> &mut Self {
+		self.active = Some(state);
 		self
 	}
 
 	/// Sets the fallback state in a state-graph.
-	pub fn fallback(&mut self, state: &State) -> &mut Self {
-		self.default = Some(state.clone());
+	pub fn fallback(&mut self, state: State) -> &mut Self {
+		self.default = Some(state);
 		self
 	}
 
 	/// Sets the working states in a state-graph.
-	pub fn states(&mut self, states: &Vec<State>) -> &mut Self {
-		self.states = states.to_vec();
+	pub fn states(&mut self, states: Vec<State>) -> &mut Self {
+		self.states = states;
 		self
 	}
 
 	/// Appends a state in the working states list.
-	pub fn append_state(&mut self, state: &State) -> &mut Self {
-		self.states.push(state.clone());
+	pub fn append_state(&mut self, state: State) -> &mut Self {
+		self.states.push(state);
 		self
 	}
 
@@ -152,7 +154,7 @@ pub fn load_stategraph() -> Result<StateGraph, Box<dyn Error>> {
 }
 
 /// Sets the active state in state-graph and propagates it.
-pub fn set_active(q_glyph: &Glyph) -> Result<(), Box<dyn Error>> {
+pub fn set_active(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
 	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
 	sg_snapshot
@@ -165,14 +167,14 @@ pub fn set_active(q_glyph: &Glyph) -> Result<(), Box<dyn Error>> {
 				.into())
 			},
 			|q_state| {
-				sg_snapshot.active(&q_state).propagate()?;
+				sg_snapshot.active(q_state.clone()).propagate()?;
 				Ok(())
 			},
 		)
 }
 
 /// Sets the default state in state-graph and propagates it.
-pub fn set_default(q_glyph: &Glyph) -> Result<(), Box<dyn Error>> {
+pub fn set_default(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
 	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
 	sg_snapshot
@@ -185,7 +187,7 @@ pub fn set_default(q_glyph: &Glyph) -> Result<(), Box<dyn Error>> {
 				.into())
 			},
 			|q_state| {
-				sg_snapshot.fallback(&q_state).propagate()?;
+				sg_snapshot.fallback(q_state.clone()).propagate()?;
 				Ok(())
 			},
 		)
@@ -209,22 +211,22 @@ pub fn add_state(
 			.is_none()
 	{
 		let new_state = State {
-			glyph: glyph,
+			glyph: glyph.clone(),
 			directory: Some(location),
 			status: status,
 		};
 
-		let mut sg_snapshot = sg_snapshot.append_state(&new_state);
+		let mut sg_snapshot = sg_snapshot.append_state(new_state.clone());
 
 		if sg_snapshot.get_default().is_none() || as_default {
-			sg_snapshot = sg_snapshot.fallback(&new_state);
-		}
-
-		if settings::get_settings()?.get_switch_on_add() || as_active {
-			sg_snapshot = sg_snapshot.active(&new_state);
+			sg_snapshot = sg_snapshot.fallback(new_state.clone());
 		}
 
 		sg_snapshot.propagate()?;
+
+		if settings::get_settings()?.get_switch_on_add() || as_active {
+			set_active(glyph.clone())?;
+		}
 
 		Ok(())
 	} else {
@@ -252,12 +254,11 @@ pub fn purge_state(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
 				let mut sg_snapshot = sg_snapshot.drop_state(&q_state);
 
 				if q_state == sg_snapshot.get_default().unwrap_or_default() {
-					sg_snapshot = sg_snapshot.fallback(&sg_snapshot.get_states()[0]);
+					sg_snapshot = sg_snapshot.fallback(sg_snapshot.get_states().clone().remove(0));
 				}
 
 				if q_state == sg_snapshot.get_active().unwrap_or_default() {
-					sg_snapshot =
-						sg_snapshot.active(&sg_snapshot.get_default().unwrap_or_default());
+					sg_snapshot = sg_snapshot.active(sg_snapshot.get_default().unwrap_or_default());
 				}
 
 				sg_snapshot.propagate()?;

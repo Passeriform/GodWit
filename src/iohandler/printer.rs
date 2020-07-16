@@ -41,9 +41,9 @@ pub fn print_state_graph(state_list: Vec<State>, verbose: bool) -> Result<(), Bo
 
 		for state in state_list {
 			table.add_row(row![c =>
-				state.glyph,
-				format!("{}", state.directory.unwrap_or_default().display()),
-				format!("{:?}", state.status.unwrap_or_default()),
+				state.get_glyph(),
+				format!("{}", state.get_directory().unwrap_or_default().display()),
+				format!("{:?}", state.get_status().unwrap_or_default()),
 			]);
 		}
 	} else {
@@ -51,8 +51,8 @@ pub fn print_state_graph(state_list: Vec<State>, verbose: bool) -> Result<(), Bo
 
 		for state in state_list {
 			table.add_row(row![c =>
-				state.glyph,
-				format!("{}", state.directory.unwrap_or_default().display()),
+				state.get_glyph(),
+				format!("{}", state.get_directory().unwrap_or_default().display()),
 			]);
 		}
 	}
