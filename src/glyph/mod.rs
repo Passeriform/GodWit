@@ -15,7 +15,7 @@ use structopt::StructOpt;
 
 /// Structure and specification for Godwit glyphs.
 #[derive(Clone, Debug, StructOpt, Serialize, Deserialize, PartialEq, Getter)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "snake_case", try_from = "String", into = "String")]
 pub struct Glyph {
 	pub tag: String,
 	pub id: String,
