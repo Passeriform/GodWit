@@ -1,10 +1,9 @@
 # TODO
 
 General itinary
-  ☐ Add more debug, trace and info logs
-
-Breaking changes
-  ☐ tui-rs introduced breaking changes. High priority refactor necessary
+  ☐ TUI full application
+  ☐ Pollution command to show files affected by godwit
+  ☐ Address returned error messages properly
 
 Splash
   ☐ Choose godwit config directory(.godwit)
@@ -14,7 +13,7 @@ Splash
 
 Autoscan projects and import settings
   ☐ Recommendations
-  ☐ Scan for .gw folders
+  ✔ Scan for .gw folders @done(2020-07-18 17:55)
 
 
 Track applications
@@ -28,10 +27,6 @@ Templates
 
 Status operation and modifying status flags
   ☐ Create Settings::status enum and macro
-
-Match errorkind to their output message
-  ☐ Track use-cases
-  ☐ Use errortypes instead of Box<Error>
 
 Add examples to docs
 

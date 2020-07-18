@@ -1,16 +1,13 @@
 //! Printer
 //!
 //! Controls input and read operations. Utility abstraction over general stdio input/read operations.
-use crate::errors::StateError;
+use crate::errors::{IOError, StateError};
 use crate::statehandler::State;
-use log::info;
 use prettytable::{cell, format, row, Table};
-use std::error::Error;
 
 /// Print pretty state-graphs.
-pub fn print_state_graph(state_list: Vec<State>, verbose: bool) -> Result<(), Box<dyn Error>> {
+pub fn print_state_graph(state_list: Vec<State>, verbose: bool) -> Result<(), IOError> {
 	if state_list.is_empty() {
-		info!("No projects added yet. Use the `add` operation.");
 		return Err(StateError::EmptyStateList.into());
 	}
 

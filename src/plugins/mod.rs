@@ -2,11 +2,10 @@
 //!
 //! A composite processor for all godwit-compatible plugins.
 //! Must follow a unified standard to keep minimal deviation.
-use crate::errors::{IOError, PluginError};
+use crate::errors::PluginError;
 use crate::settings;
 use getter_derive::Getter;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::process::{Command, Output, Stdio};
 
 // TODO: Convert this into a trait
@@ -29,7 +28,7 @@ impl Default for Plugin {
 }
 
 /// Call a detached external process for a plugin.
-pub fn invoke(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Output, Box<dyn Error>> {
+pub fn invoke(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Output, PluginError> {
 	let command_str = get_plugin(plugin_str)?.get_exec();
 	let mut args = args_options.unwrap_or_default();
 
@@ -41,7 +40,7 @@ pub fn invoke(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Outpu
 }
 
 /// Bind stdio to spawned child process and pipe io to it.
-pub fn bind(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Vec<u8>, Box<dyn Error>> {
+pub fn bind(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Vec<u8>, PluginError> {
 	let command_str = get_plugin(plugin_str)?.get_exec();
 	let mut args = args_options.unwrap_or_default();
 
@@ -59,15 +58,14 @@ pub fn bind(plugin_str: &str, args_options: Option<Vec<&str>>) -> Result<Vec<u8>
 	if output.status.success() {
 		Ok(output.stdout)
 	} else {
-		Err(IOError::StdErr {
-			err: String::from_utf8(output.stderr)?,
-		}
-		.into())
+		Err(PluginError::StdErr {
+			message: String::from_utf8(output.stderr)?,
+		})
 	}
 }
 
 /// Retrieve plugin from queried name.
-pub fn get_plugin(q_plugin: &str) -> Result<Plugin, Box<dyn Error>> {
+pub fn get_plugin(q_plugin: &str) -> Result<Plugin, PluginError> {
 	let plugins = settings::get_settings()?.get_plugins();
 	plugins
 		.into_iter()
@@ -75,8 +73,7 @@ pub fn get_plugin(q_plugin: &str) -> Result<Plugin, Box<dyn Error>> {
 		.map_or(
 			Err(PluginError::PluginNotFound {
 				plugin: q_plugin.into(),
-			}
-			.into()),
+			}),
 			|plugin| Ok(plugin),
 		)
 }

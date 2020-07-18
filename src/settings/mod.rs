@@ -7,7 +7,6 @@ use getter_derive::Getter;
 use glob::glob;
 use log::info;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::fs::{self, File};
 use std::path::PathBuf;
 
@@ -64,7 +63,7 @@ impl Settings {
 	}
 
 	/// Returns state-graph source file.
-	pub fn get_save_state(&self) -> Result<PathBuf, Box<dyn Error>> {
+	pub fn get_save_state(&self) -> Result<PathBuf, SettingsError> {
 		if self.headless {
 			return Err(SettingsError::DisallowedHeadless.into());
 		}
@@ -81,7 +80,7 @@ impl Settings {
 	}
 
 	/// Propagates changes to settings.
-	pub fn save_settings(&self, upsert: bool) -> Result<(), Box<dyn Error>> {
+	pub fn save_settings(&self, upsert: bool) -> Result<(), SettingsError> {
 		let working_dir = &self.working_dir.clone().unwrap(); // This should always give panic on None
 
 		if !working_dir.exists() {
@@ -139,7 +138,7 @@ impl Default for Settings {
 }
 
 /// Get settings instance from settings source file.
-pub fn get_settings() -> Result<Settings, Box<dyn Error>> {
+pub fn get_settings() -> Result<Settings, SettingsError> {
 	let home_dir = dirs::home_dir().expect("Home couldn't be located in current $PATH variables.");
 
 	let working_dir = home_dir.join(".godwit");
@@ -181,7 +180,7 @@ pub fn get_settings() -> Result<Settings, Box<dyn Error>> {
 }
 
 /// Purges settings source file and states.
-pub fn purge_settings(purge_states: bool) -> Result<(), Box<dyn Error>> {
+pub fn purge_settings(purge_states: bool) -> Result<(), SettingsError> {
 	let home_dir = dirs::home_dir().expect("Home couldn't be located in current $PATH variables.");
 
 	let working_dir = home_dir.join(".godwit");

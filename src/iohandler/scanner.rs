@@ -1,12 +1,13 @@
 //! Scanner
 //!
 //! Controls output and write operations. Utility abstraction over general stdio output/write operations.
+use crate::errors::IOError;
 use std::fs::File;
-use std::io::{BufRead, BufReader, Lines, Result};
+use std::io::{BufRead, BufReader, Lines};
 use std::path::Path;
 
 /// Collect bytes from ANSI document and return io::Lines.
-pub fn read_ansi<P>(filename: P) -> Result<Lines<BufReader<File>>>
+pub fn read_ansi<P>(filename: P) -> Result<Lines<BufReader<File>>, IOError>
 where
 	P: AsRef<Path>,
 {
@@ -15,7 +16,7 @@ where
 }
 
 /// Collect io::Lines into list of strings.
-pub fn parse_art(filename: &str, width: usize) -> Result<Vec<String>> {
+pub fn parse_art(filename: &str, width: usize) -> Result<Vec<String>, IOError> {
 	let mut linevec = Vec::new();
 
 	read_ansi(filename).and_then(|lines| {

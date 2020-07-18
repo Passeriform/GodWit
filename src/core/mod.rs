@@ -6,15 +6,15 @@
 mod setup;
 
 use crate::core::setup::{setup_gw_dir, setup_init_state};
+use crate::errors::CoreError;
 use crate::glyph::Glyph;
 use crate::plugins;
 use crate::statehandler::{self, State};
 use crate::tui;
-use std::error::Error;
 use std::path::PathBuf;
 
 /// One-time Godwit setup call.
-pub fn init(path: Option<PathBuf>, headless: bool, refresh: bool) -> Result<(), Box<dyn Error>> {
+pub fn init(path: Option<PathBuf>, headless: bool, refresh: bool) -> Result<(), CoreError> {
 	setup_gw_dir(path, headless, refresh)?;
 	setup_init_state()?;
 	Ok(())
@@ -27,7 +27,7 @@ pub fn add(
 	existing: bool,
 	active: bool,
 	default: bool,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), CoreError> {
 	if !existing {
 		plugins::invoke("Weaver", None)?;
 	}
@@ -37,19 +37,19 @@ pub fn add(
 }
 
 /// Remove project from Godwit
-pub fn remove(glyph: Glyph) -> Result<(), Box<dyn Error>> {
+pub fn remove(glyph: Glyph) -> Result<(), CoreError> {
 	statehandler::purge_state(glyph)?;
 	Ok(())
 }
 
 /// List projects under Godwit.
-pub fn list() -> Result<Vec<State>, Box<dyn Error>> {
+pub fn list() -> Result<Vec<State>, CoreError> {
 	let states = statehandler::load_stategraph()?.get_states().to_vec();
 	Ok(states)
 }
 
 /// Switch to another project under Godwit.
-pub fn switch(glyph: Glyph, default: bool) -> Result<(), Box<dyn Error>> {
+pub fn switch(glyph: Glyph, default: bool) -> Result<(), CoreError> {
 	statehandler::set_active(glyph.clone())?;
 
 	if default {
@@ -60,7 +60,7 @@ pub fn switch(glyph: Glyph, default: bool) -> Result<(), Box<dyn Error>> {
 }
 
 /// Forward to splash TUI.
-pub fn runsplash() -> Result<(), Box<dyn Error>> {
+pub fn runsplash() -> Result<(), CoreError> {
 	tui::run()?;
 	Ok(())
 }

@@ -1,12 +1,12 @@
 //! Godwit State Handler
 //!
 //! A core state management utility for context switching and global singletons.
+use crate::env::{set_env_var, Var};
 use crate::errors::StateError;
 use crate::glyph::Glyph;
 use crate::settings;
 use getter_derive::Getter;
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use std::fs::File;
 use std::path::PathBuf;
 
@@ -123,7 +123,7 @@ impl StateGraph {
 	}
 
 	/// Commits changes to state-graph file.
-	pub fn propagate(&self) -> Result<(), Box<dyn Error>> {
+	pub fn propagate(&self) -> Result<(), StateError> {
 		File::create(settings::get_settings()?.get_save_state()?).and_then(|state_file| {
 			serde_json::to_writer_pretty(state_file, &self)?;
 			Ok(())
@@ -144,7 +144,7 @@ impl Default for StateGraph {
 }
 
 /// Returns a state-graph instance from the state-graph file.
-pub fn load_stategraph() -> Result<StateGraph, Box<dyn Error>> {
+pub fn load_stategraph() -> Result<StateGraph, StateError> {
 	let state_graph =
 		File::open(settings::get_settings()?.get_save_state()?).and_then(|state_file| {
 			let state_graph: StateGraph = serde_json::from_reader(state_file)?;
@@ -154,7 +154,7 @@ pub fn load_stategraph() -> Result<StateGraph, Box<dyn Error>> {
 }
 
 /// Sets the active state in state-graph and propagates it.
-pub fn set_active(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
+pub fn set_active(q_glyph: Glyph) -> Result<(), StateError> {
 	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
 	sg_snapshot
@@ -168,13 +168,19 @@ pub fn set_active(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
 			},
 			|q_state| {
 				sg_snapshot.active(q_state.clone()).propagate()?;
+
+				set_env_var(
+					Var::GPD,
+					q_state.directory.clone().unwrap().to_str().unwrap(),
+				)?;
+
 				Ok(())
 			},
 		)
 }
 
 /// Sets the default state in state-graph and propagates it.
-pub fn set_default(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
+pub fn set_default(q_glyph: Glyph) -> Result<(), StateError> {
 	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
 	sg_snapshot
@@ -200,7 +206,7 @@ pub fn add_state(
 	status: Option<Vec<Status>>,
 	as_active: bool,
 	as_default: bool,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), StateError> {
 	let mut sg_snapshot = load_stategraph().unwrap_or_default();
 
 	if sg_snapshot
@@ -238,7 +244,7 @@ pub fn add_state(
 }
 
 /// Removes the state from state-graph
-pub fn purge_state(q_glyph: Glyph) -> Result<(), Box<dyn Error>> {
+pub fn purge_state(q_glyph: Glyph) -> Result<(), StateError> {
 	let mut sg_snapshot: StateGraph = load_stategraph()?;
 
 	sg_snapshot
